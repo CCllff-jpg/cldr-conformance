@@ -26,3 +26,8 @@ keywords = [
 preferred_target = "native"
 
 description = "CLDR conformance benchmark and differential tester for MoonBit i18n implementations"
+
+import {
+  "moonbitlang/async@0.22.4",
+  "gmlewis/sha256@0.18.0",
+}

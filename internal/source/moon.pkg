@@ -1,0 +1,21 @@
+// 数据源抓取包（阶段 1 / D2-F1）。
+//
+// 职责：把 CLDR 官方测试数据下载到本地并计算内容摘要。
+// 只做「取回 + 摘要」，清单与编排分别在 D2-F2 / D2-F3。
+//
+// 依赖原生后端：网络与文件系统 API 只有 native 目标可用。
+
+import {
+  "gmlewis/sha256",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/http",
+  "moonbitlang/core/debug",
+}
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/env",
+} for "wbtest"
+
+supported_targets = "+native"

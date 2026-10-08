@@ -1,10 +1,21 @@
 ///|
-/// 阶段 1（D2）实现：拉取 CLDR 官方测试数据、校验 SHA256、写入 `fixtures/`。
+/// D2-F1：把单个 URL 下载到指定路径，并输出字节数与 SHA-256。
 ///
-/// 数据清单与来源见 `DATA-SOURCES.md`，排期见 `开发方案.md` §4.0 D2。
-fn main {
-  println("cldr-conformance · fetch-data (skeleton)")
-  println(
-    "  待实现：拉取 CLDR testData → 校验 SHA256 → 写入 fixtures/SOURCES.json",
-  )
+/// 用法：
+///   moon run cmd/fetch-data -- --url <url> --out <path>
+///
+/// 本功能只负责「取回 + 摘要」；清单（SOURCES.json）、`--verify` 离线校验、
+/// `--full` 分档与失败重试在 D2-F2 / D2-F3 实现。
+async fn main {
+  let args = @env.args()
+  match (flag_value(args, "--url"), flag_value(args, "--out")) {
+    (Some(url), Some(out)) => {
+      println("GET \{url}")
+      let result = @source.fetch_to_file(url, out)
+      println("  → \{result.path}")
+      println("  字节数: \{result.bytes}")
+      println("  SHA256: \{result.sha256}")
+    }
+    _ => println("用法: moon run cmd/fetch-data -- --url <url> --out <path>")
+  }
 }
