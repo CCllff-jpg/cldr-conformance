@@ -3,20 +3,43 @@ package "CCllff-jpg/cldr-conformance/internal/source"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
+pub fn count_failures(Array[VerifyEntry]) -> Int
+
 pub async fn fetch_to_file(String, String) -> FetchResult
+
+pub async fn load_manifest(String) -> Manifest
+
+pub fn manifest_from_json_string(StringView) -> Manifest raise
 
 pub fn parent_dir(String) -> String?
 
+pub fn render_verify_report(String, Manifest, Array[VerifyEntry]) -> String
+
+pub async fn save_manifest(String, Manifest) -> Unit
+
 pub fn sha256_hex(Bytes) -> String
+
+pub fn verify_bytes(Bytes, SourceFile) -> VerifyOutcome
+
+pub async fn verify_file(SourceFile) -> VerifyOutcome
+
+pub async fn verify_manifest(Manifest) -> Array[VerifyEntry]
 
 // Errors
 pub(all) suberror FetchError {
   UnexpectedStatus(url~ : String, code~ : Int)
 } derive(@debug.Debug)
 pub fn FetchError::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror SourceError {
+  ManifestNotFound(path~ : String)
+  VerificationFailed(mismatches~ : Int)
+} derive(@debug.Debug)
+pub fn SourceError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) struct FetchResult {
@@ -28,6 +51,60 @@ pub(all) struct FetchResult {
 pub fn FetchResult::equal(Self, Self) -> Bool
 pub fn FetchResult::not_equal(Self, Self) -> Bool
 pub fn FetchResult::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Manifest {
+  cldr_version : String
+  files : Array[SourceFile]
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Manifest::equal(Self, Self) -> Bool
+pub fn Manifest::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Manifest::not_equal(Self, Self) -> Bool
+pub fn Manifest::to_json(Self) -> Json
+pub fn Manifest::to_json_string(Self) -> String
+pub fn Manifest::to_repr(Self) -> @debug.Repr
+
+pub(all) struct SourceFile {
+  suite : String
+  path : String
+  url : String
+  sha256 : String
+  bytes : Int
+  tier : Tier
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn SourceFile::equal(Self, Self) -> Bool
+pub fn SourceFile::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn SourceFile::not_equal(Self, Self) -> Bool
+pub fn SourceFile::to_json(Self) -> Json
+pub fn SourceFile::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Tier {
+  Fast
+  Full
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Tier::equal(Self, Self) -> Bool
+pub fn Tier::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Tier::not_equal(Self, Self) -> Bool
+pub fn Tier::to_json(Self) -> Json
+pub fn Tier::to_repr(Self) -> @debug.Repr
+
+pub(all) struct VerifyEntry {
+  file : SourceFile
+  outcome : VerifyOutcome
+} derive(Eq, @debug.Debug)
+pub fn VerifyEntry::equal(Self, Self) -> Bool
+pub fn VerifyEntry::not_equal(Self, Self) -> Bool
+pub fn VerifyEntry::to_repr(Self) -> @debug.Repr
+
+pub(all) enum VerifyOutcome {
+  Match
+  Mismatch(expected~ : String, actual~ : String)
+  SizeMismatch(expected~ : Int, actual~ : Int)
+  Missing
+} derive(Eq, @debug.Debug)
+pub fn VerifyOutcome::equal(Self, Self) -> Bool
+pub fn VerifyOutcome::is_ok(Self) -> Bool
+pub fn VerifyOutcome::not_equal(Self, Self) -> Bool
+pub fn VerifyOutcome::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

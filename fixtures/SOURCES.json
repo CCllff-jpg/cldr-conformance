@@ -1,0 +1,13 @@
+{
+  "cldr_version": "main",
+  "files": [
+    {
+      "suite": "decimal",
+      "path": "fixtures/decimal/decimals.tsv",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/decimal/decimals.tsv",
+      "sha256": "e19820ae98ea505e11b9fb385edd22cbe69275bdb837da92c03950a2f453e816",
+      "bytes": 7395,
+      "tier": "Fast"
+    }
+  ]
+}

@@ -19,3 +19,17 @@ test "flag_value 只取第一个匹配，避免被后续同名的值覆盖" {
     Some("first"),
   )
 }
+
+///|
+test "has_flag 识别无值开关" {
+  assert_true(has_flag(["--verify"], "--verify"))
+  assert_true(has_flag(["--verify", "--manifest", "m.json"], "--verify"))
+  assert_false(has_flag(["--manifest", "m.json"], "--verify"))
+  assert_false(has_flag([], "--verify"))
+}
+
+///|
+test "has_flag 不会把值当成开关" {
+  // 值里出现同名文本不算开关（只做整参数匹配）
+  assert_false(has_flag(["--out", "verify"], "--verify"))
+}
