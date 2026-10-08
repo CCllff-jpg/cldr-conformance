@@ -7,9 +7,7 @@ version = "0.1.0"
 
 readme = "README.mbt.md"
 
-// 创建 GitHub 仓库后填入，例如 https://github.com/CCllff-jpg/cldr-conformance
-
-repository = ""
+repository = "https://github.com/CCllff-jpg/cldr-conformance"
 
 license = "Apache-2.0"
 
