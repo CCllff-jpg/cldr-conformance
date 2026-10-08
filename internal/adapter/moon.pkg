@@ -1,0 +1,6 @@
+// 适配器登记包（阶段 2 / D5）。
+// 适配器契约 FormatUnderTest 由 facade 包拥有，本包只维护登记信息。
+
+import {
+  "moonbitlang/core/debug",
+}

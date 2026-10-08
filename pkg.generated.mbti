@@ -1,0 +1,73 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "CCllff-jpg/cldr-conformance"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) enum CaseOutcome {
+  Pass
+  Fail(reason~ : FailReason, expected~ : String, actual~ : String)
+  Unsupported(feature~ : String)
+  NotInstalled
+} derive(Eq, @debug.Debug)
+pub fn CaseOutcome::equal(Self, Self) -> Bool
+pub fn CaseOutcome::not_equal(Self, Self) -> Bool
+pub fn CaseOutcome::to_repr(Self) -> @debug.Repr
+
+pub(all) enum FailReason {
+  GroupingMismatch
+  DigitSystemMismatch
+  RoundingMismatch
+  PluralCategoryMismatch
+  BidiControlMissing
+  CompactFormMismatch
+  PatternSyntaxUnsupported
+  Other
+} derive(Eq, @debug.Debug)
+pub fn FailReason::equal(Self, Self) -> Bool
+pub fn FailReason::not_equal(Self, Self) -> Bool
+pub fn FailReason::to_repr(Self) -> @debug.Repr
+
+pub(all) enum NumberLength {
+  Standard
+  Short
+  Long
+} derive(Eq, @debug.Debug)
+pub fn NumberLength::equal(Self, Self) -> Bool
+pub fn NumberLength::not_equal(Self, Self) -> Bool
+pub fn NumberLength::to_repr(Self) -> @debug.Repr
+
+pub(all) enum NumberStyle {
+  DecimalStyle
+  PercentStyle
+  ScientificStyle
+  CurrencyStyle
+} derive(Eq, @debug.Debug)
+pub fn NumberStyle::equal(Self, Self) -> Bool
+pub fn NumberStyle::not_equal(Self, Self) -> Bool
+pub fn NumberStyle::to_repr(Self) -> @debug.Repr
+
+pub(all) enum Suite {
+  Decimal
+  Datetime
+  MessageFormat2
+} derive(Eq, @debug.Debug)
+pub fn Suite::all() -> Array[Self]
+pub fn Suite::equal(Self, Self) -> Bool
+pub fn Suite::label(Self) -> String
+pub fn Suite::not_equal(Self, Self) -> Bool
+pub fn Suite::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits
+pub(open) trait FormatUnderTest {
+  fn name(Self) -> String
+  fn format_number(Self, String, String, style~ : NumberStyle, length~ : NumberLength) -> String raise
+}

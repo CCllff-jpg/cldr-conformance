@@ -1,0 +1,6 @@
+// 语料解析包（阶段 1 / D3–D4）。
+// 公开数据模型由 facade 包拥有，本包只负责把官方数据解析成那些类型（见 DESIGN.md D4）。
+
+import {
+  "moonbitlang/core/debug",
+}

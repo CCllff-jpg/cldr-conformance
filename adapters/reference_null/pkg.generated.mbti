@@ -1,0 +1,27 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "CCllff-jpg/cldr-conformance/adapters/reference_null"
+
+import {
+  "CCllff-jpg/cldr-conformance",
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct ReferenceNull {
+  label : String
+} derive(Eq, @debug.Debug)
+pub fn ReferenceNull::equal(Self, Self) -> Bool
+pub fn ReferenceNull::format_number(Self, String, String, style~ : @cldr-conformance.NumberStyle, length~ : @cldr-conformance.NumberLength) -> String raise
+pub fn ReferenceNull::name(Self) -> String
+pub fn ReferenceNull::new() -> Self
+pub fn ReferenceNull::not_equal(Self, Self) -> Bool
+pub fn ReferenceNull::to_repr(Self) -> @debug.Repr
+pub impl @cldr-conformance.FormatUnderTest for ReferenceNull
+
+// Type aliases
+
+// Traits

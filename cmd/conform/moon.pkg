@@ -1,0 +1,5 @@
+import {
+  "CCllff-jpg/cldr-conformance" @conformance,
+}
+
+pkgtype(kind: "executable")

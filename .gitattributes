@@ -1,0 +1,12 @@
+# 统一以 LF 入库，避免 Windows/Linux 之间出现换行符抖动
+# （本机 git 全局 core.autocrlf=true，此文件优先级更高）
+* text=auto eol=lf
+
+# 二进制资源不做换行符处理
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.wasm binary
+*.ico binary
