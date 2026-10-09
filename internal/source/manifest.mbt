@@ -38,6 +38,8 @@ pub(all) suberror SourceError {
   ManifestNotFound(path~ : String)
   /// 校验发现不一致的条目数量（> 0 即失败，用于 CI 退出码）。
   VerificationFailed(mismatches~ : Int)
+  /// 同步失败的条目数量（> 0 即失败，用于 CI 退出码）。
+  SyncFailed(failures~ : Int)
 } derive(Debug)
 
 ///|
@@ -59,6 +61,28 @@ pub async fn load_manifest(path : String) -> Manifest {
     raise SourceError::ManifestNotFound(path~)
   }
   manifest_from_json_string(@fs.read_file(path).text())
+}
+
+///|
+/// 读取清单；文件不存在时返回空清单（首次同步的正常场景）。
+pub async fn load_manifest_or_empty(path : String) -> Manifest {
+  if @fs.exists(path) {
+    load_manifest(path)
+  } else {
+    { cldr_version: cldr_ref(), files: [], }
+  }
+}
+
+///|
+/// 按路径查找记录：同步时用它判断「本地是否已有同一来源的文件」。
+pub fn Manifest::find(self : Manifest, path : String) -> SourceFile? {
+  let mut found : SourceFile? = None
+  for file in self.files {
+    if found is None && file.path == path {
+      found = Some(file)
+    }
+  }
+  found
 }
 
 ///|

@@ -1,12 +1,13 @@
-// 数据源抓取包（阶段 1 / D2）。
+// 数据源包（阶段 1 / D2）。
 //
-// 职责：把 CLDR 官方测试数据下载到本地（F1）、登记为可校验的清单并支持离线校验（F2）。
-// 编排（分档、幂等、重试）在 D2-F3。
+// 职责：下载 CLDR 官方测试数据（F1）、登记为可校验的清单并支持离线校验（F2）、
+// 按内置目录批量同步并支持重试与幂等（F3）。
 //
 // 依赖原生后端：网络与文件系统 API 只有 native 目标可用。
 
 import {
   "gmlewis/sha256",
+  "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/async/http",
   "moonbitlang/core/debug",

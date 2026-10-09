@@ -4,3 +4,10 @@ target/
 target
 .mooncakes/
 .moonagent/
+
+# 全量档数据不入库（体积大，合计约 740 KB）。
+# 需要时用 `moon run cmd/fetch-data -- --sync --full` 按需下载，见 DATA-SOURCES.md
+fixtures/decimal/decimals_extended_numbers.tsv
+fixtures/datetime/skeletons_all_locales.tsv
+fixtures/datetime/skeletons_all_skeletons.tsv
+fixtures/datetime/skeletons_random_5percent.tsv

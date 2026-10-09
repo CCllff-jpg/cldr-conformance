@@ -15,6 +15,8 @@ pub(all) struct FetchResult {
 pub(all) suberror FetchError {
   /// 服务端返回了非 2xx 状态码。
   UnexpectedStatus(url~ : String, code~ : Int)
+  /// 重试耗尽仍然失败；`reason` 保留最后一次的原始错误，便于排查。
+  ExhaustedRetries(url~ : String, attempts~ : Int, reason~ : String)
 } derive(Debug)
 
 ///|

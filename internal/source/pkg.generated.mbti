@@ -2,20 +2,41 @@
 package "CCllff-jpg/cldr-conformance/internal/source"
 
 import {
+  "moonbitlang/async",
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
 }
 
 // Values
+pub fn can_reuse(CatalogEntry, SourceFile?, VerifyOutcome) -> Bool
+
+pub fn catalog_all() -> Array[CatalogEntry]
+
+pub fn catalog_fast() -> Array[CatalogEntry]
+
+pub fn catalog_full() -> Array[CatalogEntry]
+
+pub fn cldr_ref() -> String
+
+pub fn count_failed(Array[SyncEntry]) -> Int
+
 pub fn count_failures(Array[VerifyEntry]) -> Int
 
 pub async fn fetch_to_file(String, String) -> FetchResult
 
+pub async fn fetch_with_retry(String, String, RetryPolicy) -> FetchResult
+
 pub async fn load_manifest(String) -> Manifest
+
+pub async fn load_manifest_or_empty(String) -> Manifest
 
 pub fn manifest_from_json_string(StringView) -> Manifest raise
 
+pub fn manifest_of(String, Array[SyncEntry]) -> Manifest
+
 pub fn parent_dir(String) -> String?
+
+pub fn render_sync_report(String, Array[SyncEntry]) -> String
 
 pub fn render_verify_report(String, Manifest, Array[VerifyEntry]) -> String
 
@@ -23,25 +44,43 @@ pub async fn save_manifest(String, Manifest) -> Unit
 
 pub fn sha256_hex(Bytes) -> String
 
+pub async fn sync_all(Array[CatalogEntry], Manifest, RetryPolicy) -> Array[SyncEntry]
+
+pub async fn sync_entry(CatalogEntry, SourceFile?, RetryPolicy) -> SyncEntry
+
 pub fn verify_bytes(Bytes, SourceFile) -> VerifyOutcome
 
 pub async fn verify_file(SourceFile) -> VerifyOutcome
 
 pub async fn verify_manifest(Manifest) -> Array[VerifyEntry]
 
+pub async fn[T] with_retry(String, RetryPolicy, async () -> T) -> T
+
 // Errors
 pub(all) suberror FetchError {
   UnexpectedStatus(url~ : String, code~ : Int)
+  ExhaustedRetries(url~ : String, attempts~ : Int, reason~ : String)
 } derive(@debug.Debug)
 pub fn FetchError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror SourceError {
   ManifestNotFound(path~ : String)
   VerificationFailed(mismatches~ : Int)
+  SyncFailed(failures~ : Int)
 } derive(@debug.Debug)
 pub fn SourceError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+pub(all) struct CatalogEntry {
+  suite : String
+  path : String
+  url : String
+  tier : Tier
+} derive(Eq, @debug.Debug)
+pub fn CatalogEntry::equal(Self, Self) -> Bool
+pub fn CatalogEntry::not_equal(Self, Self) -> Bool
+pub fn CatalogEntry::to_repr(Self) -> @debug.Repr
+
 pub(all) struct FetchResult {
   url : String
   path : String
@@ -57,11 +96,23 @@ pub(all) struct Manifest {
   files : Array[SourceFile]
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 pub fn Manifest::equal(Self, Self) -> Bool
+pub fn Manifest::find(Self, String) -> SourceFile?
 pub fn Manifest::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Manifest::not_equal(Self, Self) -> Bool
 pub fn Manifest::to_json(Self) -> Json
 pub fn Manifest::to_json_string(Self) -> String
 pub fn Manifest::to_repr(Self) -> @debug.Repr
+
+pub(all) struct RetryPolicy {
+  max_attempts : Int
+  backoff_ms : Int
+} derive(Eq, @debug.Debug)
+pub fn RetryPolicy::default() -> Self
+pub fn RetryPolicy::equal(Self, Self) -> Bool
+pub fn RetryPolicy::max_retry(Self) -> Int
+pub fn RetryPolicy::not_equal(Self, Self) -> Bool
+pub fn RetryPolicy::retry_method(Self) -> @async.RetryMethod
+pub fn RetryPolicy::to_repr(Self) -> @debug.Repr
 
 pub(all) struct SourceFile {
   suite : String
@@ -76,6 +127,24 @@ pub fn SourceFile::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecod
 pub fn SourceFile::not_equal(Self, Self) -> Bool
 pub fn SourceFile::to_json(Self) -> Json
 pub fn SourceFile::to_repr(Self) -> @debug.Repr
+
+pub(all) struct SyncEntry {
+  entry : CatalogEntry
+  outcome : SyncOutcome
+} derive(Eq, @debug.Debug)
+pub fn SyncEntry::equal(Self, Self) -> Bool
+pub fn SyncEntry::not_equal(Self, Self) -> Bool
+pub fn SyncEntry::to_repr(Self) -> @debug.Repr
+
+pub(all) enum SyncOutcome {
+  Skipped(file~ : SourceFile)
+  Downloaded(file~ : SourceFile)
+  Failed(reason~ : String)
+} derive(Eq, @debug.Debug)
+pub fn SyncOutcome::equal(Self, Self) -> Bool
+pub fn SyncOutcome::is_failure(Self) -> Bool
+pub fn SyncOutcome::not_equal(Self, Self) -> Bool
+pub fn SyncOutcome::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Tier {
   Fast

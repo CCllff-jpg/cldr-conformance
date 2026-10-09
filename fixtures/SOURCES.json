@@ -8,6 +8,94 @@
       "sha256": "e19820ae98ea505e11b9fb385edd22cbe69275bdb837da92c03950a2f453e816",
       "bytes": 7395,
       "tier": "Fast"
+    },
+    {
+      "suite": "decimal",
+      "path": "fixtures/decimal/decimals_modern_locales.tsv",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/decimal/decimals_modern_locales.tsv",
+      "sha256": "1366950f5456a7057581d48ae2c55f5adf88e0e0b8cb63f30658a92132377402",
+      "bytes": 74459,
+      "tier": "Fast"
+    },
+    {
+      "suite": "datetime",
+      "path": "fixtures/datetime/datetime.json",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/datetime/datetime.json",
+      "sha256": "ad816aade244b1178f09d2852354b9cc7e8e20afa44ac6599e45d7a1d6405d14",
+      "bytes": 82880,
+      "tier": "Fast"
+    },
+    {
+      "suite": "datetime",
+      "path": "fixtures/datetime/skeletons.tsv",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/datetime/skeletons.tsv",
+      "sha256": "a8db83cba93b1860a911157217466e039e8e45a13738fd4e6d72ab04318fc820",
+      "bytes": 10888,
+      "tier": "Fast"
+    },
+    {
+      "suite": "datetime",
+      "path": "fixtures/datetime/skeletons_all_calendars.tsv",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/datetime/skeletons_all_calendars.tsv",
+      "sha256": "fc3cb5d641ebd6e86c79e0cd094281af29e5b6a4d55d68759cb452d9f08bf71c",
+      "bytes": 33406,
+      "tier": "Fast"
+    },
+    {
+      "suite": "message-format-2",
+      "path": "fixtures/messageFormat/tests/syntax.json",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/messageFormat/tests/syntax.json",
+      "sha256": "4311db5ee6cfc307fa0505a7484ce7cf9e326dd770cc1c85772a35b3fdbdb810",
+      "bytes": 22541,
+      "tier": "Fast"
+    },
+    {
+      "suite": "message-format-2",
+      "path": "fixtures/messageFormat/tests/syntax-errors.json",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/messageFormat/tests/syntax-errors.json",
+      "sha256": "26a090b1eb1fdda98d578362c7a49184350a5f80fd919ad54a1735e00786909b",
+      "bytes": 6154,
+      "tier": "Fast"
+    },
+    {
+      "suite": "message-format-2",
+      "path": "fixtures/messageFormat/tests/data-model-errors.json",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/messageFormat/tests/data-model-errors.json",
+      "sha256": "6b8d8527b5248af76bca3f61d7c58c3339c91b05555f2fc11727efc81b94e615",
+      "bytes": 4156,
+      "tier": "Fast"
+    },
+    {
+      "suite": "message-format-2",
+      "path": "fixtures/messageFormat/tests/pattern-selection.json",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/messageFormat/tests/pattern-selection.json",
+      "sha256": "510a7e054f7d86eee645877bbfe8739bcd7ccabfa4290c8fbd93d64e3a89dadc",
+      "bytes": 4283,
+      "tier": "Fast"
+    },
+    {
+      "suite": "message-format-2",
+      "path": "fixtures/messageFormat/tests/fallback.json",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/messageFormat/tests/fallback.json",
+      "sha256": "9654322cdaed27660b53d91e7142795aa62ce2da87a99e7ce6a471549139c010",
+      "bytes": 2142,
+      "tier": "Fast"
+    },
+    {
+      "suite": "message-format-2",
+      "path": "fixtures/messageFormat/tests/bidi.json",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/messageFormat/tests/bidi.json",
+      "sha256": "fa3ebcd416dbdadab63731ee7a18a25b531773e4cc159dbe22da4ca1cba64afb",
+      "bytes": 5176,
+      "tier": "Fast"
+    },
+    {
+      "suite": "message-format-2",
+      "path": "fixtures/messageFormat/tests/u-options.json",
+      "url": "https://raw.githubusercontent.com/unicode-org/cldr/main/common/testData/messageFormat/tests/u-options.json",
+      "sha256": "6931deea81ec7c2a282e48428fee3250b3b27ee74690573e3c2ed23747d1f64a",
+      "bytes": 3243,
+      "tier": "Fast"
     }
   ]
 }

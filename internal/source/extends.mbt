@@ -59,3 +59,27 @@ pub extend Manifest with ToJson::{to_json}
 
 ///|
 pub extend Manifest with @json.FromJson::{from_json}
+
+///|
+pub extend RetryPolicy with @debug.Debug::{to_repr}
+
+///|
+pub extend RetryPolicy with Eq::{equal, not_equal}
+
+///|
+pub extend CatalogEntry with @debug.Debug::{to_repr}
+
+///|
+pub extend CatalogEntry with Eq::{equal, not_equal}
+
+///|
+pub extend SyncOutcome with @debug.Debug::{to_repr}
+
+///|
+pub extend SyncOutcome with Eq::{equal, not_equal}
+
+///|
+pub extend SyncEntry with @debug.Debug::{to_repr}
+
+///|
+pub extend SyncEntry with Eq::{equal, not_equal}
