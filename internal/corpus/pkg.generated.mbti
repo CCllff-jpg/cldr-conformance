@@ -2,15 +2,27 @@
 package "CCllff-jpg/cldr-conformance/internal/corpus"
 
 import {
+  "CCllff-jpg/cldr-conformance",
   "moonbitlang/core/debug",
 }
 
 // Values
+pub fn decimal_corpus_from_tsv(StringView) -> @cldr-conformance.DecimalCorpus raise
+
+pub fn parse_decimal_cases(TsvTable) -> Array[@cldr-conformance.DecimalCase] raise DecimalParseError
+
 pub fn parse_tsv(StringView) -> TsvTable
 
 pub fn render_tsv(TsvTable) -> String
 
 // Errors
+pub(all) suberror DecimalParseError {
+  MissingColumn(column~ : String)
+  RaggedRow(line~ : Int)
+  UnknownStyle(line~ : Int, value~ : String)
+  UnknownLength(line~ : Int, value~ : String)
+} derive(@debug.Debug)
+pub fn DecimalParseError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) struct CorpusStats {

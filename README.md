@@ -1,5 +1,7 @@
 # cldr-conformance
 
+[![ci](https://github.com/CCllff-jpg/cldr-conformance/actions/workflows/ci.yml/badge.svg)](https://github.com/CCllff-jpg/cldr-conformance/actions/workflows/ci.yml)
+
 **CLDR conformance benchmark and differential tester for MoonBit i18n implementations.**
 
 用 [CLDR](https://cldr.unicode.org/) 官方测试数据，度量并对比 MoonBit 生态里各个 i18n 实现的一致性：谁符合标准、差在哪个维度、差多少。

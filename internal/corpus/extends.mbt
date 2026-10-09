@@ -11,3 +11,6 @@ pub extend TsvTable with @debug.Debug::{to_repr}
 
 ///|
 pub extend TsvTable with Eq::{equal, not_equal}
+
+///|
+pub extend DecimalParseError with @debug.Debug::{to_repr}

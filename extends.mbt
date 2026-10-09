@@ -33,3 +33,15 @@ pub extend CaseOutcome with @debug.Debug::{to_repr}
 
 ///|
 pub extend CaseOutcome with Eq::{equal, not_equal}
+
+///|
+pub extend DecimalCase with @debug.Debug::{to_repr}
+
+///|
+pub extend DecimalCase with Eq::{equal, not_equal}
+
+///|
+pub extend DecimalCorpus with @debug.Debug::{to_repr}
+
+///|
+pub extend DecimalCorpus with Eq::{equal, not_equal}

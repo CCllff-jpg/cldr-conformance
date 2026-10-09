@@ -1,14 +1,16 @@
-// 语料解析包（阶段 1 / D3–D4）。
+// 语料解析包（阶段 1 / D4）。
 // 公开数据模型由 facade 包拥有，本包只负责把官方数据解析成那些类型（见 DESIGN.md D4）。
 //
 // 解析逻辑本身是纯字符串处理，但测试需要读取 fixtures/ 下的真实文件，
 // 因此整包声明为 native-only（与 internal/source 一致）。
 
 import {
+  "CCllff-jpg/cldr-conformance" @conformance,
   "moonbitlang/core/debug",
 }
 
 import {
+  "CCllff-jpg/cldr-conformance" @conformance,
   "moonbitlang/async",
   "moonbitlang/async/fs",
 } for "wbtest"

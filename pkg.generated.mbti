@@ -20,6 +20,29 @@ pub fn CaseOutcome::equal(Self, Self) -> Bool
 pub fn CaseOutcome::not_equal(Self, Self) -> Bool
 pub fn CaseOutcome::to_repr(Self) -> @debug.Repr
 
+pub(all) struct DecimalCase {
+  locale : String
+  style : NumberStyle
+  length : NumberLength
+  input : String
+  expected : String
+  line : Int
+} derive(Eq, @debug.Debug)
+pub fn DecimalCase::equal(Self, Self) -> Bool
+pub fn DecimalCase::not_equal(Self, Self) -> Bool
+pub fn DecimalCase::to_repr(Self) -> @debug.Repr
+
+pub(all) struct DecimalCorpus {
+  cases : Array[DecimalCase]
+} derive(Eq, @debug.Debug)
+pub fn DecimalCorpus::equal(Self, Self) -> Bool
+pub fn DecimalCorpus::length(Self) -> Int
+pub fn DecimalCorpus::locales(Self) -> Array[String]
+pub fn DecimalCorpus::new(Array[DecimalCase]) -> Self
+pub fn DecimalCorpus::not_equal(Self, Self) -> Bool
+pub fn DecimalCorpus::of_locale(Self, String) -> Array[DecimalCase]
+pub fn DecimalCorpus::to_repr(Self) -> @debug.Repr
+
 pub(all) enum FailReason {
   GroupingMismatch
   DigitSystemMismatch
