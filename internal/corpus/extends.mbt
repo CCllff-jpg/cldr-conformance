@@ -5,3 +5,9 @@ pub extend CorpusStats with @debug.Debug::{to_repr}
 
 ///|
 pub extend CorpusStats with Eq::{equal, not_equal}
+
+///|
+pub extend TsvTable with @debug.Debug::{to_repr}
+
+///|
+pub extend TsvTable with Eq::{equal, not_equal}

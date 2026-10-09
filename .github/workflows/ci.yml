@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: Toolchain version
+        run: moon version --all
+
+      - name: Update dependencies
+        run: moon update
+
+      - name: Check (all targets)
+        run: moon check --target all
+
+      - name: Test
+        run: moon test
+
+      # 完全离线：读 fixtures/ 与 SOURCES.json，重算摘要并比对
+      - name: Verify data manifest (offline)
+        run: moon run cmd/fetch-data -- --verify

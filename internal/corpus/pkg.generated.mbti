@@ -6,6 +6,9 @@ import {
 }
 
 // Values
+pub fn parse_tsv(StringView) -> TsvTable
+
+pub fn render_tsv(TsvTable) -> String
 
 // Errors
 
@@ -19,6 +22,20 @@ pub fn CorpusStats::equal(Self, Self) -> Bool
 pub fn CorpusStats::is_empty(Self) -> Bool
 pub fn CorpusStats::not_equal(Self, Self) -> Bool
 pub fn CorpusStats::to_repr(Self) -> @debug.Repr
+
+pub(all) struct TsvTable {
+  header : Array[String]
+  rows : Array[Array[String]]
+} derive(Eq, @debug.Debug)
+pub fn TsvTable::column_index(Self, String) -> Int?
+pub fn TsvTable::column_values(Self, String) -> Array[String]
+pub fn TsvTable::control_char_count(Self) -> Int
+pub fn TsvTable::equal(Self, Self) -> Bool
+pub fn TsvTable::get(Self, Int, String) -> String?
+pub fn TsvTable::not_equal(Self, Self) -> Bool
+pub fn TsvTable::ragged_rows(Self) -> Array[Int]
+pub fn TsvTable::row_count(Self) -> Int
+pub fn TsvTable::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
