@@ -4,7 +4,9 @@
 
 用 [CLDR](https://cldr.unicode.org/) 官方测试数据，度量并对比 MoonBit 生态里各个 i18n 实现的一致性：谁符合标准、差在哪个维度、差多少。
 
-> 状态：**骨架阶段**。包结构与 CLI 已就位，数据管线与执行引擎按 `开发方案.md` §4.0 的 D2–D21 逐步实现。
+> 状态：**数据管线已完成（D2 的 F1–F3）**。可以按不可变 tag 拉取 12 个官方测试文件、
+> 记录摘要、离线校验并幂等重跑；**一致性对拍主体**（解析 → 执行 → 归因 → 报告）
+> 按 `开发方案.md` §4.0 的 D3–D21 推进。
 
 ## 解决什么问题
 
@@ -28,14 +30,15 @@ CLDR 官方公开了一致性测试数据（`common/testData/`，见 `DATA-SOURC
 ## 当前结构
 
 ```
-cmd/fetch-data/     # 拉取并校验 CLDR 官方测试数据（D2）
+cmd/fetch-data/     # 数据资产工具：--sync / --verify / 单文件下载（D2 已完成）
 cmd/conform/        # 主 CLI：跑套件、出报告（D6 起）
 cmd/report-site/    # 报告 JSON → 静态 HTML（D16+）
+internal/source/    # 目录、下载、摘要、清单、离线校验、幂等同步（D2 已完成）
 internal/corpus/    # TSV / JSON 测试数据解析（D3–D4）
 internal/engine/    # 用例执行、归因、最小化（D5–D7）
 internal/adapter/   # 适配器 trait 与登记（D5）
 adapters/           # 每个被测实现一个包，reference_null 用于引擎自测
-fixtures/           # 官方测试数据快照（含来源与 SHA256）
+fixtures/           # 官方测试数据快照 + SOURCES.json（来源与 SHA256）
 ```
 
 ## 快速开始
@@ -43,7 +46,11 @@ fixtures/           # 官方测试数据快照（含来源与 SHA256）
 ```bash
 moon check --target all
 moon test
-moon run cmd/conform
+
+# 数据管线（默认已入库，可直接离线校验）
+moon run cmd/fetch-data -- --verify
+# 需要重新拉取时（幂等：已是最新的文件会跳过）
+moon run cmd/fetch-data -- --sync
 ```
 
 套件枚举（`README.mbt.md` 中的 `mbt check` 代码块会被 `moon test` 真实执行）：
@@ -59,7 +66,7 @@ test {
 
 ## 许可证
 
-代码 Apache-2.0；CLDR 测试数据为 [Unicode License v3](https://www.unicode.org/license.txt)，来源与校验和见 `DATA-SOURCES.md`。
+代码 Apache-2.0；CLDR 测试数据为 [Unicode License v3](https://www.unicode.org/license.txt)，数据基线、文件清单与第三方依赖许可证见 `DATA-SOURCES.md`。
 
 ---
 

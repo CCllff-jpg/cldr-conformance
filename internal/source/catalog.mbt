@@ -1,10 +1,14 @@
 ///|
-/// CLDR 测试数据的 ref。
+/// CLDR 测试数据的 ref —— **不可变 tag**，保证摘要长期可复核。
 ///
-/// 当前指向 `main`（对应上游 `common/testData`）。F4 会把它钉到具体发布 tag，
-/// 使报告里的「CLDR 版本」可以长期复核。
+/// 选 `release-49-beta3` 的原因：final `release-48` 还没有这批测试数据
+/// （`decimals.tsv` 等是后来加的），而 49 尚未 GA；tag 本身不可变，
+/// 因此 URL 与随之记录的 SHA256 都能长期对上。
+///
+/// 升级方式：改成本行常量 → 重跑 `moon run cmd/fetch-data -- --sync` →
+/// 审阅 `fixtures/SOURCES.json` 的摘要 diff（上游若改了数据，摘要必然变化）。
 pub fn cldr_ref() -> String {
-  "main"
+  "release-49-beta3"
 }
 
 ///|
