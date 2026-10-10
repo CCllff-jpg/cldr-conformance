@@ -1,3 +1,17 @@
 #!/bin/sh
+#
+# 提交前钩子。用 `git config core.hooksPath .githooks` 启用（见开发方案.md 附录 B）。
+#
+# 1) 隐私硬约束：公开仓库不得出现本机绝对路径 / 用户目录。放在最前面，先失败先省时间。
+#    - fixtures/ 单独排除：那是上游官方数据，其中的 |C:\\| 属于 CLDR 的转义测试用例，
+#      改它会导致 SOURCES.json 里的 SHA256 对不上。
+#    - 关键坑：本文件（以及注释）**绝不能出现用户目录名字面量**，否则这条 grep 会命中
+#      自己，导致每次提交都被拒绝。因此模式里用 App[D]ata 这种方括号写法。
+# 2) 类型检查。
+
+if git grep -n -I -E '[A-Za-z]:[\\/][A-Za-z]|Users[\\/][A-Za-z]|App[D]ata' -- ':!fixtures'; then
+  echo "提交被拒绝：发现本机绝对路径或用户目录，请清理后再提交。" >&2
+  exit 1
+fi
 
 moon check

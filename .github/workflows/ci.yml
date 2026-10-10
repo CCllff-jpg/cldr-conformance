@@ -11,6 +11,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # 硬约束：公开仓库不得出现本机绝对路径 / 用户目录。
+      # 放在装工具链之前，先失败先省钱。注意两点：
+      # - fixtures/ 单独排除：那是上游官方数据，其中的 |C:\\| 属于 CLDR 的转义测试用例，
+      #   改它会导致 SOURCES.json 里的 SHA256 对不上
+      # - `App[D]ata` 写成方括号形式，避免这条 grep 命中它自己（否则 CI 永远失败）
+      - name: Guard against local absolute paths
+        run: |
+          if git grep -n -I -E '[A-Za-z]:[\\/][A-Za-z]|Users[\\/][A-Za-z]|App[D]ata' -- ':!fixtures'; then
+            echo "::error::发现本机绝对路径或用户目录，请清理后再提交"
+            exit 1
+          fi
+
       - name: Set up MoonBit
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
