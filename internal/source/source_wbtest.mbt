@@ -40,11 +40,10 @@ test "parent_dir 同时接受 Windows 分隔符" {
 }
 
 ///|
-test "parent_dir 对含非 ASCII 的路径也正确（本项目根目录含中文）" {
+test "parent_dir 对含非 ASCII 的路径也正确" {
   assert_eq(
-    parent_dir(
-      "E:/javacode/moonbit十月黑客松/cldr-conformance/fixtures/x.tsv",
-    ),
-    Some("E:/javacode/moonbit十月黑客松/cldr-conformance/fixtures"),
+    parent_dir("/srv/项目/app/fixtures/x.tsv"),
+    Some("/srv/项目/app/fixtures"),
   )
+  assert_eq(parent_dir("项目/数据/x.tsv"), Some("项目/数据"))
 }
