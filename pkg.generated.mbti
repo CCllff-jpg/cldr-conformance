@@ -20,6 +20,38 @@ pub fn CaseOutcome::equal(Self, Self) -> Bool
 pub fn CaseOutcome::not_equal(Self, Self) -> Bool
 pub fn CaseOutcome::to_repr(Self) -> @debug.Repr
 
+pub(all) struct DatetimeCase {
+  locale : String
+  calendar : String
+  input : String
+  expected : String
+  semantic_skeleton : String?
+  classical_skeleton : String?
+  semantic_skeleton_length : String?
+  zone_style : String?
+  time_length : String?
+  date_length : String?
+  hour_cycle : String?
+  year_style : String?
+  date_time_format_type : String?
+  index : Int
+} derive(Eq, @debug.Debug)
+pub fn DatetimeCase::equal(Self, Self) -> Bool
+pub fn DatetimeCase::not_equal(Self, Self) -> Bool
+pub fn DatetimeCase::to_repr(Self) -> @debug.Repr
+
+pub(all) struct DatetimeCorpus {
+  skeletons : Array[SkeletonCase]
+  formatted : Array[DatetimeCase]
+} derive(Eq, @debug.Debug)
+pub fn DatetimeCorpus::calendars(Self) -> Array[String]
+pub fn DatetimeCorpus::equal(Self, Self) -> Bool
+pub fn DatetimeCorpus::length(Self) -> Int
+pub fn DatetimeCorpus::locales(Self) -> Array[String]
+pub fn DatetimeCorpus::new(Array[SkeletonCase], Array[DatetimeCase]) -> Self
+pub fn DatetimeCorpus::not_equal(Self, Self) -> Bool
+pub fn DatetimeCorpus::to_repr(Self) -> @debug.Repr
+
 pub(all) struct DecimalCase {
   locale : String
   style : NumberStyle
@@ -75,6 +107,17 @@ pub(all) enum NumberStyle {
 pub fn NumberStyle::equal(Self, Self) -> Bool
 pub fn NumberStyle::not_equal(Self, Self) -> Bool
 pub fn NumberStyle::to_repr(Self) -> @debug.Repr
+
+pub(all) struct SkeletonCase {
+  locale : String
+  calendar : String
+  skeleton : String
+  pattern : String
+  line : Int
+} derive(Eq, @debug.Debug)
+pub fn SkeletonCase::equal(Self, Self) -> Bool
+pub fn SkeletonCase::not_equal(Self, Self) -> Bool
+pub fn SkeletonCase::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Suite {
   Decimal

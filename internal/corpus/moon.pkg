@@ -7,6 +7,7 @@
 import {
   "CCllff-jpg/cldr-conformance" @conformance,
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 import {

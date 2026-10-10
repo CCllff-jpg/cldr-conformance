@@ -45,3 +45,21 @@ pub extend DecimalCorpus with @debug.Debug::{to_repr}
 
 ///|
 pub extend DecimalCorpus with Eq::{equal, not_equal}
+
+///|
+pub extend SkeletonCase with @debug.Debug::{to_repr}
+
+///|
+pub extend SkeletonCase with Eq::{equal, not_equal}
+
+///|
+pub extend DatetimeCase with @debug.Debug::{to_repr}
+
+///|
+pub extend DatetimeCase with Eq::{equal, not_equal}
+
+///|
+pub extend DatetimeCorpus with @debug.Debug::{to_repr}
+
+///|
+pub extend DatetimeCorpus with Eq::{equal, not_equal}

@@ -22,7 +22,15 @@ async fn main {
   println(
     "  数字套件  decimals_modern_locales.tsv \{modern.length()} 条用例 / \{modern.locales().length()} 个语言",
   )
-  println("  日期套件与 MF2 套件：D4-F2 / D4-F3 接入")
+  let datetime = @corpus.datetime_corpus_from_text(
+    @fs.read_file("fixtures/datetime/skeletons.tsv").text(),
+    @fs.read_file("fixtures/datetime/skeletons_all_calendars.tsv").text(),
+    @fs.read_file("fixtures/datetime/datetime.json").text(),
+  )
+  println(
+    "  日期套件  \{datetime.skeletons.length()} 条骨架 + \{datetime.formatted.length()} 条格式化 / \{datetime.locales().length()} 个语言 / \{datetime.calendars().length()} 种日历",
+  )
+  println("  MF2 套件：D4-F3 接入")
   println(
     "  待实现：适配器执行、失败归因与报告输出（D6–D7）",
   )
