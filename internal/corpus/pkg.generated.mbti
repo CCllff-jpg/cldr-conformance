@@ -15,6 +15,8 @@ pub fn parse_datetime_json(StringView) -> Array[@cldr-conformance.DatetimeCase] 
 
 pub fn parse_decimal_cases(TsvTable) -> Array[@cldr-conformance.DecimalCase] raise DecimalParseError
 
+pub fn parse_message_tests(String, StringView) -> Array[@cldr-conformance.MessageCase] raise
+
 pub fn parse_skeleton_cases(TsvTable) -> Array[@cldr-conformance.SkeletonCase] raise DatetimeParseError
 
 pub fn parse_tsv(StringView) -> TsvTable
@@ -40,6 +42,14 @@ pub(all) suberror DecimalParseError {
   UnknownLength(line~ : Int, value~ : String)
 } derive(@debug.Debug)
 pub fn DecimalParseError::to_repr(Self) -> @debug.Repr
+
+pub(all) suberror MessageParseError {
+  Malformed(file~ : String, detail~ : String)
+  MissingField(file~ : String, index~ : Int, name~ : String)
+  UnknownField(file~ : String, index~ : Int, name~ : String)
+  WrongType(file~ : String, index~ : Int, name~ : String)
+} derive(@debug.Debug)
+pub fn MessageParseError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) struct CorpusStats {

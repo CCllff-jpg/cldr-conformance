@@ -17,3 +17,6 @@ pub extend DecimalParseError with @debug.Debug::{to_repr}
 
 ///|
 pub extend DatetimeParseError with @debug.Debug::{to_repr}
+
+///|
+pub extend MessageParseError with @debug.Debug::{to_repr}

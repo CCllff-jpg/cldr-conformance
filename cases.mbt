@@ -158,3 +158,83 @@ pub fn DatetimeCorpus::calendars(self : DatetimeCorpus) -> Array[String] {
   calendars.sort_by(lexicographic_compare)
   calendars
 }
+
+///|
+/// 一条 MF2 用例（`messageFormat/tests/*.json` 的一个 test）。
+///
+/// 上游用「**文件级默认值 + 用例级覆盖**」表达期望：例如 `syntax-errors.json` 的
+/// `defaultTestProperties` 带 `expErrors`，其 133 个用例只写 `src` 就继承了它。
+/// 因此这里存的是**合并后**的结果，而不是用例的原始字段。
+pub(all) struct MessageCase {
+  /// 来源文件名，例如 `syntax.json`。
+  file : String
+  scenario : String
+  /// 在该文件 `tests` 数组中的下标（0 起）。
+  index : Int
+  description : String?
+  /// MF2 消息源码。
+  src : String
+  /// 合并默认值后的语言。
+  locale : String
+  /// 合并默认值后的 bidi 隔离设置（`None` 表示上游未指定）。
+  bidi_isolation : String?
+  /// 期望输出；`None` 表示该用例期望失败（见 `expected_errors`）。
+  exp : String?
+  /// 期望的错误类别，例如 `syntax-error`、`bad-option`。
+  expected_errors : Array[String]
+  /// 该用例期望结构化 parts 输出。当前实现普遍不产出，故单独标记而不是当作通过。
+  expects_parts : Bool
+  /// `u:` 选项标签（仅 u-options.json 使用）。
+  tags : Array[String]
+  /// 输入参数的原始 JSON 片段，交给适配器自行解析（避免在这里过度建模）。
+  params_json : String?
+} derive(Debug, Eq)
+
+///|
+/// MF2 套件的用例集合。
+pub(all) struct MessageCorpus {
+  cases : Array[MessageCase]
+} derive(Debug, Eq)
+
+///|
+pub fn MessageCorpus::new(cases : Array[MessageCase]) -> MessageCorpus {
+  { cases, }
+}
+
+///|
+pub fn MessageCorpus::length(self : MessageCorpus) -> Int {
+  self.cases.length()
+}
+
+///|
+/// 涉及的来源文件（去重后按字典序）。
+pub fn MessageCorpus::files(self : MessageCorpus) -> Array[String] {
+  let seen : Map[String, Unit] = Map([])
+  for item in self.cases {
+    seen[item.file] = ()
+  }
+  let files = seen.keys().to_array()
+  files.sort_by(lexicographic_compare)
+  files
+}
+
+///|
+/// 涉及的上游场景（去重后按字典序）。
+pub fn MessageCorpus::scenarios(self : MessageCorpus) -> Array[String] {
+  let seen : Map[String, Unit] = Map([])
+  for item in self.cases {
+    seen[item.scenario] = ()
+  }
+  let scenarios = seen.keys().to_array()
+  scenarios.sort_by(lexicographic_compare)
+  scenarios
+}
+
+///|
+/// 某个场景的用例（保持源文件顺序）。
+pub fn MessageCorpus::of_scenario(
+  self : MessageCorpus,
+  scenario : String,
+) -> Array[MessageCase] {
+  self.cases.filter(item => item.scenario == scenario)
+}

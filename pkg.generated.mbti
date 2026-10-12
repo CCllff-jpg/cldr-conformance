@@ -89,6 +89,36 @@ pub fn FailReason::equal(Self, Self) -> Bool
 pub fn FailReason::not_equal(Self, Self) -> Bool
 pub fn FailReason::to_repr(Self) -> @debug.Repr
 
+pub(all) struct MessageCase {
+  file : String
+  scenario : String
+  index : Int
+  description : String?
+  src : String
+  locale : String
+  bidi_isolation : String?
+  exp : String?
+  expected_errors : Array[String]
+  expects_parts : Bool
+  tags : Array[String]
+  params_json : String?
+} derive(Eq, @debug.Debug)
+pub fn MessageCase::equal(Self, Self) -> Bool
+pub fn MessageCase::not_equal(Self, Self) -> Bool
+pub fn MessageCase::to_repr(Self) -> @debug.Repr
+
+pub(all) struct MessageCorpus {
+  cases : Array[MessageCase]
+} derive(Eq, @debug.Debug)
+pub fn MessageCorpus::equal(Self, Self) -> Bool
+pub fn MessageCorpus::files(Self) -> Array[String]
+pub fn MessageCorpus::length(Self) -> Int
+pub fn MessageCorpus::new(Array[MessageCase]) -> Self
+pub fn MessageCorpus::not_equal(Self, Self) -> Bool
+pub fn MessageCorpus::of_scenario(Self, String) -> Array[MessageCase]
+pub fn MessageCorpus::scenarios(Self) -> Array[String]
+pub fn MessageCorpus::to_repr(Self) -> @debug.Repr
+
 pub(all) enum NumberLength {
   Standard
   Short

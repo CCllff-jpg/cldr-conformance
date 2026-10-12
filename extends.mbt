@@ -63,3 +63,15 @@ pub extend DatetimeCorpus with @debug.Debug::{to_repr}
 
 ///|
 pub extend DatetimeCorpus with Eq::{equal, not_equal}
+
+///|
+pub extend MessageCase with @debug.Debug::{to_repr}
+
+///|
+pub extend MessageCase with Eq::{equal, not_equal}
+
+///|
+pub extend MessageCorpus with @debug.Debug::{to_repr}
+
+///|
+pub extend MessageCorpus with Eq::{equal, not_equal}

@@ -1,4 +1,5 @@
 import {
+  "CCllff-jpg/cldr-conformance" @conformance,
   "CCllff-jpg/cldr-conformance/internal/corpus",
   "CCllff-jpg/cldr-conformance/internal/source",
   "moonbitlang/async",
