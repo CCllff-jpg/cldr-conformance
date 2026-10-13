@@ -52,12 +52,104 @@ pub(all) enum CaseOutcome {
 } derive(Debug, Eq)
 
 ///|
-/// 被测实现需要实现的适配接口。
+/// 适配器可声明的能力。日期骨架查询和日期格式化分别声明，
+/// 以便只支持其中一项的实现可以如实返回 `Unsupported`。
+pub(all) enum AdapterCapability {
+  Decimal
+  DatetimeSkeleton
+  DatetimeFormat
+  MessageFormat2
+} derive(Debug, Eq)
+
+///|
+/// 所有可声明的能力，顺序稳定。
+pub fn AdapterCapability::all() -> Array[AdapterCapability] {
+  [Decimal, DatetimeSkeleton, DatetimeFormat, MessageFormat2]
+}
+
+///|
+/// 能力在 CLI 和报告中的稳定标识。
+pub fn AdapterCapability::label(self : AdapterCapability) -> String {
+  match self {
+    Decimal => "decimal"
+    DatetimeSkeleton => "datetime-skeleton"
+    DatetimeFormat => "datetime-format"
+    MessageFormat2 => "message-format-2"
+  }
+}
+
+///|
+/// 适配器声明的一组能力。构造时按首次出现顺序去重。
+pub struct AdapterCapabilities {
+  capabilities : Array[AdapterCapability]
+} derive(Debug, Eq)
+
+///|
+pub fn AdapterCapabilities::new(
+  capabilities : Array[AdapterCapability],
+) -> AdapterCapabilities {
+  let unique : Array[AdapterCapability] = []
+  for capability in capabilities {
+    if !unique.contains(capability) {
+      unique.push(capability)
+    }
+  }
+  { capabilities: unique, }
+}
+
+///|
+pub fn AdapterCapabilities::all() -> AdapterCapabilities {
+  AdapterCapabilities::new(AdapterCapability::all())
+}
+
+///|
+pub fn AdapterCapabilities::contains(
+  self : AdapterCapabilities,
+  capability : AdapterCapability,
+) -> Bool {
+  self.capabilities.contains(capability)
+}
+
+///|
+/// 日期格式化的输入参数，不包含 CLDR 的期望结果和来源行号。
+pub(all) struct DatetimeFormatInput {
+  locale : String
+  calendar : String
+  input : String
+  semantic_skeleton : String?
+  classical_skeleton : String?
+  semantic_skeleton_length : String?
+  zone_style : String?
+  time_length : String?
+  date_length : String?
+  hour_cycle : String?
+  year_style : String?
+  date_time_format_type : String?
+} derive(Debug, Eq)
+
+///|
+/// MF2 格式化的输入参数，不包含 CLDR 的期望输出或期望错误。
+pub(all) struct MessageFormat2Input {
+  locale : String
+  source : String
+  bidi_isolation : String?
+  tags : Array[String]
+  params_json : String?
+} derive(Debug, Eq)
+
+///|
+/// MF2 适配器的实际结果。错误按 CLDR 测试数据中的类别返回。
+pub(all) enum MessageFormat2Result {
+  Formatted(String)
+  Errors(Array[String])
+} derive(Debug, Eq)
+
+///|
+/// 数字格式化适配器。
 ///
-/// `value` 用 `String` 而非数值类型传入：生态内各 i18n 包的数值类型并不统一
-/// （core 有 `Int`/`BigInt`/`Double`，但没有统一的十进制类型），
-/// 用字符串是同时适配所有实现的唯一可行方案（取舍记录见 `DESIGN.md`）。
-pub(open) trait FormatUnderTest {
+/// `value` 用 `String` 而非数值类型传入：生态内各 i18n 包的数值类型并不统一，
+/// 用字符串可以避免浮点转换引入额外舍入误差（见 `DESIGN.md` D2）。
+pub(open) trait NumberAdapter {
   fn name(Self) -> String
   fn format_number(
     Self,
@@ -66,6 +158,26 @@ pub(open) trait FormatUnderTest {
     style~ : NumberStyle,
     length~ : NumberLength,
   ) -> String raise
+}
+
+///|
+/// 日期格式化适配器。
+pub(open) trait DatetimeAdapter {
+  fn name(Self) -> String
+  fn format_skeleton(
+    Self,
+    locale : String,
+    calendar : String,
+    skeleton : String,
+  ) -> String raise
+  fn format_datetime(Self, input : DatetimeFormatInput) -> String raise
+}
+
+///|
+/// MessageFormat 2 适配器。
+pub(open) trait MessageFormat2Adapter {
+  fn name(Self) -> String
+  fn format_message(Self, input : MessageFormat2Input) -> MessageFormat2Result raise
 }
 
 ///|

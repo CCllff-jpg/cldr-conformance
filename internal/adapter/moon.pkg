@@ -1,6 +1,11 @@
-// 适配器登记包（阶段 2 / D5）。
-// 适配器契约 FormatUnderTest 由 facade 包拥有，本包只维护登记信息。
+// M1 适配器登记包。
+// 数字、日期和 MF2 trait 由 facade 包拥有，本包维护登记、能力校验和选择。
 
 import {
+  "CCllff-jpg/cldr-conformance" @conformance,
   "moonbitlang/core/debug",
 }
+
+import {
+  "CCllff-jpg/cldr-conformance/adapters/reference_null",
+} for "wbtest"

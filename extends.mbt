@@ -35,6 +35,36 @@ pub extend CaseOutcome with @debug.Debug::{to_repr}
 pub extend CaseOutcome with Eq::{equal, not_equal}
 
 ///|
+pub extend AdapterCapability with @debug.Debug::{to_repr}
+
+///|
+pub extend AdapterCapability with Eq::{equal, not_equal}
+
+///|
+pub extend AdapterCapabilities with @debug.Debug::{to_repr}
+
+///|
+pub extend AdapterCapabilities with Eq::{equal, not_equal}
+
+///|
+pub extend DatetimeFormatInput with @debug.Debug::{to_repr}
+
+///|
+pub extend DatetimeFormatInput with Eq::{equal, not_equal}
+
+///|
+pub extend MessageFormat2Input with @debug.Debug::{to_repr}
+
+///|
+pub extend MessageFormat2Input with Eq::{equal, not_equal}
+
+///|
+pub extend MessageFormat2Result with @debug.Debug::{to_repr}
+
+///|
+pub extend MessageFormat2Result with Eq::{equal, not_equal}
+
+///|
 pub extend DecimalCase with @debug.Debug::{to_repr}
 
 ///|

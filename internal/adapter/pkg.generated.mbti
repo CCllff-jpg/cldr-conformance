@@ -2,22 +2,48 @@
 package "CCllff-jpg/cldr-conformance/internal/adapter"
 
 import {
+  "CCllff-jpg/cldr-conformance",
   "moonbitlang/core/debug",
 }
 
 // Values
 
 // Errors
+pub(all) suberror AdapterRegistryError {
+  EmptyId
+  DuplicateId(id~ : String)
+  UnknownId(id~ : String)
+  MissingHandler(id~ : String, capability~ : String)
+  UnexpectedHandler(id~ : String, capability~ : String)
+} derive(@debug.Debug)
+pub fn AdapterRegistryError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) struct AdapterInfo {
+  id : String
   name : String
   installed : Bool
+  capabilities : @cldr-conformance.AdapterCapabilities
 } derive(Eq, @debug.Debug)
 pub fn AdapterInfo::equal(Self, Self) -> Bool
-pub fn AdapterInfo::new(name~ : String, installed? : Bool) -> Self
+pub fn AdapterInfo::new(id~ : String, name~ : String, capabilities~ : @cldr-conformance.AdapterCapabilities, installed? : Bool) -> Self
 pub fn AdapterInfo::not_equal(Self, Self) -> Bool
 pub fn AdapterInfo::to_repr(Self) -> @debug.Repr
+
+pub struct AdapterRegistry {
+  entries : Array[RegistryEntry]
+}
+pub fn AdapterRegistry::datetime_adapter(Self, String) -> &@cldr-conformance.DatetimeAdapter?
+pub fn AdapterRegistry::find(Self, String) -> AdapterInfo?
+pub fn AdapterRegistry::installed(Self) -> Array[AdapterInfo]
+pub fn AdapterRegistry::message_format_2_adapter(Self, String) -> &@cldr-conformance.MessageFormat2Adapter?
+pub fn AdapterRegistry::new() -> Self
+pub fn AdapterRegistry::number_adapter(Self, String) -> &@cldr-conformance.NumberAdapter?
+pub fn AdapterRegistry::register(Self, AdapterInfo, number? : &@cldr-conformance.NumberAdapter?, datetime? : &@cldr-conformance.DatetimeAdapter?, message_format_2? : &@cldr-conformance.MessageFormat2Adapter?) -> Unit raise AdapterRegistryError
+pub fn AdapterRegistry::select(Self, Array[String]) -> Array[AdapterInfo] raise AdapterRegistryError
+pub fn AdapterRegistry::unavailable_outcome(Self, String, Array[String], @cldr-conformance.AdapterCapability) -> @cldr-conformance.CaseOutcome? raise AdapterRegistryError
+
+type RegistryEntry
 
 // Type aliases
 

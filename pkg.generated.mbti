@@ -10,6 +10,28 @@ import {
 // Errors
 
 // Types and methods
+pub struct AdapterCapabilities {
+  capabilities : Array[AdapterCapability]
+} derive(Eq, @debug.Debug)
+pub fn AdapterCapabilities::all() -> Self
+pub fn AdapterCapabilities::contains(Self, AdapterCapability) -> Bool
+pub fn AdapterCapabilities::equal(Self, Self) -> Bool
+pub fn AdapterCapabilities::new(Array[AdapterCapability]) -> Self
+pub fn AdapterCapabilities::not_equal(Self, Self) -> Bool
+pub fn AdapterCapabilities::to_repr(Self) -> @debug.Repr
+
+pub(all) enum AdapterCapability {
+  Decimal
+  DatetimeSkeleton
+  DatetimeFormat
+  MessageFormat2
+} derive(Eq, @debug.Debug)
+pub fn AdapterCapability::all() -> Array[Self]
+pub fn AdapterCapability::equal(Self, Self) -> Bool
+pub fn AdapterCapability::label(Self) -> String
+pub fn AdapterCapability::not_equal(Self, Self) -> Bool
+pub fn AdapterCapability::to_repr(Self) -> @debug.Repr
+
 pub(all) enum CaseOutcome {
   Pass
   Fail(reason~ : FailReason, expected~ : String, actual~ : String)
@@ -51,6 +73,24 @@ pub fn DatetimeCorpus::locales(Self) -> Array[String]
 pub fn DatetimeCorpus::new(Array[SkeletonCase], Array[DatetimeCase]) -> Self
 pub fn DatetimeCorpus::not_equal(Self, Self) -> Bool
 pub fn DatetimeCorpus::to_repr(Self) -> @debug.Repr
+
+pub(all) struct DatetimeFormatInput {
+  locale : String
+  calendar : String
+  input : String
+  semantic_skeleton : String?
+  classical_skeleton : String?
+  semantic_skeleton_length : String?
+  zone_style : String?
+  time_length : String?
+  date_length : String?
+  hour_cycle : String?
+  year_style : String?
+  date_time_format_type : String?
+} derive(Eq, @debug.Debug)
+pub fn DatetimeFormatInput::equal(Self, Self) -> Bool
+pub fn DatetimeFormatInput::not_equal(Self, Self) -> Bool
+pub fn DatetimeFormatInput::to_repr(Self) -> @debug.Repr
 
 pub(all) struct DecimalCase {
   locale : String
@@ -119,6 +159,25 @@ pub fn MessageCorpus::of_scenario(Self, String) -> Array[MessageCase]
 pub fn MessageCorpus::scenarios(Self) -> Array[String]
 pub fn MessageCorpus::to_repr(Self) -> @debug.Repr
 
+pub(all) struct MessageFormat2Input {
+  locale : String
+  source : String
+  bidi_isolation : String?
+  tags : Array[String]
+  params_json : String?
+} derive(Eq, @debug.Debug)
+pub fn MessageFormat2Input::equal(Self, Self) -> Bool
+pub fn MessageFormat2Input::not_equal(Self, Self) -> Bool
+pub fn MessageFormat2Input::to_repr(Self) -> @debug.Repr
+
+pub(all) enum MessageFormat2Result {
+  Formatted(String)
+  Errors(Array[String])
+} derive(Eq, @debug.Debug)
+pub fn MessageFormat2Result::equal(Self, Self) -> Bool
+pub fn MessageFormat2Result::not_equal(Self, Self) -> Bool
+pub fn MessageFormat2Result::to_repr(Self) -> @debug.Repr
+
 pub(all) enum NumberLength {
   Standard
   Short
@@ -163,7 +222,18 @@ pub fn Suite::to_repr(Self) -> @debug.Repr
 // Type aliases
 
 // Traits
-pub(open) trait FormatUnderTest {
+pub(open) trait DatetimeAdapter {
+  fn name(Self) -> String
+  fn format_skeleton(Self, String, String, String) -> String raise
+  fn format_datetime(Self, DatetimeFormatInput) -> String raise
+}
+
+pub(open) trait MessageFormat2Adapter {
+  fn name(Self) -> String
+  fn format_message(Self, MessageFormat2Input) -> MessageFormat2Result raise
+}
+
+pub(open) trait NumberAdapter {
   fn name(Self) -> String
   fn format_number(Self, String, String, style~ : NumberStyle, length~ : NumberLength) -> String raise
 }

@@ -6,9 +6,9 @@
 
 用 [CLDR](https://cldr.unicode.org/) 官方测试数据，度量并对比 MoonBit 生态里各个 i18n 实现的一致性：谁符合标准、差在哪个维度、差多少。
 
-> 状态：**数据管线（D2）与三个套件的用例模型（D3–D4）已完成**——CLDR 官方数据可按不可变
-> tag 拉取、离线校验并幂等重跑，且已解析成 **4714 条可执行用例**（数字 2625 / 日期 1752 /
-> MF2 337）。执行引擎与失败归因按 `开发方案.md` §4.0 的 D5–D7 推进。
+> 状态：**M1 适配器契约、能力登记与 `--impls` 选择已完成**。CLDR 官方数据可按不可变 tag
+> 拉取、离线校验并幂等重跑，且已解析成 **4714 条用例**（数字 2625 / 日期 1752 / MF2 337）。
+> 当前 CLI 可选择并列出适配器；用例执行、失败归因与报告按 `开发方案.md` §4.2 继续推进。
 
 ## 解决什么问题
 
@@ -33,12 +33,12 @@ CLDR 官方公开了一致性测试数据（`common/testData/`，见 `DATA-SOURC
 
 ```
 cmd/fetch-data/     # 数据资产工具：--sync / --verify / 单文件下载（D2 已完成）
-cmd/conform/        # 主 CLI：跑套件、出报告（D6 起）
+cmd/conform/        # 主 CLI：登记适配器、解析 --impls 并清点用例；执行与报告后续接入
 cmd/report-site/    # 报告 JSON → 静态 HTML（D16+）
 internal/source/    # 目录、下载、摘要、清单、离线校验、幂等同步（D2 已完成）
 internal/corpus/    # TSV / JSON 测试数据解析（D3–D4）
 internal/engine/    # 用例执行、归因、最小化（D5–D7）
-internal/adapter/   # 适配器 trait 与登记（D5）
+internal/adapter/   # 适配器 trait 对象登记、能力校验与选择（M1）
 adapters/           # 每个被测实现一个包，reference_null 用于引擎自测
 fixtures/           # 官方测试数据快照 + SOURCES.json（来源与 SHA256）
 ```

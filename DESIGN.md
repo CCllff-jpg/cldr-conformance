@@ -53,7 +53,7 @@
 
 **问题**：`DecimalCase`、报告模型等类型放哪里？
 
-**选择**：公开数据模型（`Suite`、`FailReason`、`CaseOutcome`、`FormatUnderTest` 等）放在模块根包（facade）；TSV/JSON 解析器、执行引擎、适配器登记表放 `internal/*`。
+**选择**：公开数据模型（`Suite`、`FailReason`、`CaseOutcome`、数字/日期/MF2 适配器 trait 等）放在模块根包（facade）；TSV/JSON 解析器、执行引擎、适配器登记表放 `internal/*`。
 
 **理由**：
 - MoonBit 中若公开函数返回 `internal` 包定义的具体类型，外部用户拿不到同样的隐式方法加载，`x.method()` 会失败；
@@ -102,3 +102,15 @@
 本文档本身就是这条要求的落实方式：任何一条设计都能追溯到"为什么这样选、放弃了什么"。
 
 **代价**：每次方案变更都要同步更新本文档，否则文档会与代码脱节——把这一步放进提交前自查表。
+
+---
+
+## D8. 适配器按套件拆分 trait，能力独立登记
+
+**问题**：数字、日期与 MF2 的上游 API 和未支持情形不同；一个统一 trait 如何表达日期实现只支持骨架查询、或 MF2 返回错误类别？
+
+**选择**：facade 分别公开 `NumberAdapter`、`DatetimeAdapter` 与 `MessageFormat2Adapter`。日期骨架查询和日期格式化作为两项能力声明；MF2 结果区分格式化输出与错误类别。适配器以稳定 ID 登记，CLI 用 `--impls` 选择。
+
+**理由**：套件之间不再被一个大型接口绑在一起；能力表可准确表达部分实现。未选入或未安装的适配器记为 `NotInstalled`，已选但未声明所需能力记为 `Unsupported`，两者都不混作格式化失败。
+
+**代价**：公开类型与登记流程更细；注册表要校验能力声明和实际 trait handler 一致，并拒绝重复或未知 ID。

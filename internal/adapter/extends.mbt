@@ -5,3 +5,6 @@ pub extend AdapterInfo with @debug.Debug::{to_repr}
 
 ///|
 pub extend AdapterInfo with Eq::{equal, not_equal}
+
+///|
+pub extend AdapterRegistryError with @debug.Debug::{to_repr}

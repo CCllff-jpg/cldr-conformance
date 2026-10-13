@@ -5,8 +5,29 @@
 /// 执行与报告在 D6–D7 接入：
 ///   moon run cmd/conform -- --suite decimal --format markdown
 async fn main {
+  let args = @env.args()
+  let registry = @adapter.AdapterRegistry::new()
+  let reference_null = @reference_null.ReferenceNull::new()
+  registry.register(
+    @adapter.AdapterInfo::new(
+      id="reference_null",
+      name="reference-null",
+      capabilities=@conformance.AdapterCapabilities::all(),
+    ),
+    number=Some(reference_null as &@conformance.NumberAdapter),
+    datetime=Some(reference_null as &@conformance.DatetimeAdapter),
+    message_format_2=Some(reference_null as &@conformance.MessageFormat2Adapter),
+  )
+  let selected = select_adapters(registry, args)
+
   let manifest = @source.load_manifest("fixtures/SOURCES.json")
   println("cldr-conformance · conform")
+  println("已选择适配器（M1 登记）：\{selected.length()}")
+  for info in selected {
+    println(
+      "  \{info.id} · \{info.name} · \{capability_labels(info.capabilities)}",
+    )
+  }
   println(
     "数据基线 \{manifest.cldr_version}（\{manifest.files.length()} 个文件）",
   )
@@ -52,4 +73,50 @@ async fn main {
   println(
     "  待实现：适配器执行、失败归因与报告输出（D6–D7）",
   )
+}
+
+///|
+fn select_adapters(
+  registry : @adapter.AdapterRegistry,
+  args : Array[String],
+) -> Array[@adapter.AdapterInfo] raise @adapter.AdapterRegistryError {
+  match flag_value(args, "--impls") {
+    Some(value) => registry.select(parse_ids(value))
+    None => registry.installed()
+  }
+}
+
+///|
+fn flag_value(args : Array[String], flag : String) -> String? {
+  let mut index = 0
+  while index < args.length() {
+    if args[index] == flag {
+      return Some(if index + 1 < args.length() { args[index + 1] } else { "" })
+    }
+    index += 1
+  }
+  None
+}
+
+///|
+fn parse_ids(value : String) -> Array[String] {
+  let ids : Array[String] = []
+  for id in value.split(",") {
+    ids.push(id.to_owned())
+  }
+  ids
+}
+
+///|
+fn capability_labels(capabilities : @conformance.AdapterCapabilities) -> String {
+  let mut result = ""
+  for capability in @conformance.AdapterCapability::all() {
+    if capabilities.contains(capability) {
+      if result != "" {
+        result = result + ", "
+      }
+      result = result + capability.label()
+    }
+  }
+  result
 }

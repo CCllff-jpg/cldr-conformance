@@ -1,9 +1,12 @@
 import {
   "CCllff-jpg/cldr-conformance" @conformance,
+  "CCllff-jpg/cldr-conformance/adapters/reference_null",
+  "CCllff-jpg/cldr-conformance/internal/adapter",
   "CCllff-jpg/cldr-conformance/internal/corpus",
   "CCllff-jpg/cldr-conformance/internal/source",
   "moonbitlang/async",
   "moonbitlang/async/fs",
+  "moonbitlang/core/env",
 }
 
 pkgtype(kind: "executable")

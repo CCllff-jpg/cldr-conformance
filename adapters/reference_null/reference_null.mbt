@@ -16,12 +16,12 @@ pub fn ReferenceNull::new() -> ReferenceNull {
 }
 
 ///|
-pub impl @conformance.FormatUnderTest for ReferenceNull with fn name(self) {
+pub impl @conformance.NumberAdapter for ReferenceNull with fn name(self) {
   self.label
 }
 
 ///|
-pub impl @conformance.FormatUnderTest for ReferenceNull with fn format_number(
+pub impl @conformance.NumberAdapter for ReferenceNull with fn format_number(
   self,
   locale,
   value,
@@ -33,4 +33,45 @@ pub impl @conformance.FormatUnderTest for ReferenceNull with fn format_number(
   ignore(style)
   ignore(length)
   value
+}
+
+///|
+pub impl @conformance.DatetimeAdapter for ReferenceNull with fn name(self) {
+  self.label
+}
+
+///|
+pub impl @conformance.DatetimeAdapter for ReferenceNull with fn format_skeleton(
+  self,
+  locale,
+  calendar,
+  skeleton,
+) {
+  ignore(self)
+  ignore(locale)
+  ignore(calendar)
+  skeleton
+}
+
+///|
+pub impl @conformance.DatetimeAdapter for ReferenceNull with fn format_datetime(
+  self,
+  input,
+) {
+  ignore(self)
+  input.input
+}
+
+///|
+pub impl @conformance.MessageFormat2Adapter for ReferenceNull with fn name(self) {
+  self.label
+}
+
+///|
+pub impl @conformance.MessageFormat2Adapter for ReferenceNull with fn format_message(
+  self,
+  input,
+) {
+  ignore(self)
+  @conformance.MessageFormat2Result::Formatted(input.source)
 }
