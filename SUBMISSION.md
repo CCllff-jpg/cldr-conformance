@@ -58,7 +58,7 @@ moon run cmd/conform                     # 清点 4714 条用例
 3. **静态 HTML 报告**：一致率矩阵 + 归因分布 + 字节级对比 + RTL 控制符可视化
 4. **给上游包的最小可复现缺陷用例与 issue**
 
-## 七、合规与来源
+## 六、合规与来源
 
 - **代码**：Apache-2.0（见 `LICENSE`）
 - **数据**：CLDR 官方测试数据，[Unicode License v3](https://www.unicode.org/license.txt)；
