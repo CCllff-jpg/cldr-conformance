@@ -123,3 +123,39 @@ pub extend CharDiff with @debug.Debug::{to_repr}
 
 ///|
 pub extend CharDiff with Eq::{equal, not_equal}
+
+///|
+pub extend SuiteSummary with @debug.Debug::{to_repr}
+
+///|
+pub extend SuiteSummary with Eq::{equal, not_equal}
+
+///|
+pub extend ReasonCount with @debug.Debug::{to_repr}
+
+///|
+pub extend ReasonCount with Eq::{equal, not_equal}
+
+///|
+pub extend FailureDetail with @debug.Debug::{to_repr}
+
+///|
+pub extend FailureDetail with Eq::{equal, not_equal}
+
+///|
+pub extend ErrorDetail with @debug.Debug::{to_repr}
+
+///|
+pub extend ErrorDetail with Eq::{equal, not_equal}
+
+///|
+pub extend AdapterReport with @debug.Debug::{to_repr}
+
+///|
+pub extend AdapterReport with Eq::{equal, not_equal}
+
+///|
+pub extend Report with @debug.Debug::{to_repr}
+
+///|
+pub extend Report with Eq::{equal, not_equal}

@@ -391,7 +391,7 @@ test "RunSummary 逐项计数与守恒" {
   assert_eq(summary.passed, 1)
   assert_eq(summary.failed, 1)
   assert_eq(summary.errored, 1)
-  assert_eq(summary.failed_unsupported, 1)
+  assert_eq(summary.unsupported, 1)
   assert_eq(summary.not_installed, 1)
   assert_eq(summary.failures(), 2)
   assert_eq(summary.excluded(), 2)
@@ -400,7 +400,7 @@ test "RunSummary 逐项计数与守恒" {
     summary.passed +
     summary.failed +
     summary.errored +
-    summary.failed_unsupported +
+    summary.unsupported +
     summary.not_installed,
   )
 }
@@ -478,7 +478,7 @@ async test "端到端：reference-null 跑完全部真实用例且计数守恒" 
   let summary = @conformance.RunSummary::from_results(results)
   assert_eq(summary.total, 4714)
   // reference-null 声明了全部能力且被选入，因此不应出现这两类
-  assert_eq(summary.failed_unsupported, 0)
+  assert_eq(summary.unsupported, 0)
   assert_eq(summary.not_installed, 0)
   assert_eq(summary.failures(), summary.failed + summary.errored)
   assert_eq(summary.total, summary.passed + summary.failed + summary.errored)

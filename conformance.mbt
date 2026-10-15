@@ -251,7 +251,7 @@ pub(all) struct RunSummary {
   total : Int
   passed : Int
   failed : Int
-  failed_unsupported : Int
+  unsupported : Int
   not_installed : Int
   errored : Int
 } derive(Debug, Eq)
@@ -262,7 +262,7 @@ pub fn RunSummary::empty() -> RunSummary {
     total: 0,
     passed: 0,
     failed: 0,
-    failed_unsupported: 0,
+    unsupported: 0,
     not_installed: 0,
     errored: 0,
   }
@@ -287,14 +287,7 @@ pub fn RunSummary::from_results(results : Array[CaseResult]) -> RunSummary {
       NotInstalled => not_installed += 1
     }
   }
-  {
-    total,
-    passed,
-    failed,
-    failed_unsupported: unsupported,
-    not_installed,
-    errored,
-  }
+  { total, passed, failed, unsupported, not_installed, errored, }
 }
 
 ///|
@@ -312,13 +305,33 @@ pub fn RunSummary::is_clean(self : RunSummary) -> Bool {
 ///|
 /// 不参与一致性统计的用例数（无能力 + 未选入）。
 pub fn RunSummary::excluded(self : RunSummary) -> Int {
-  self.failed_unsupported + self.not_installed
+  self.unsupported + self.not_installed
+}
+
+///|
+/// 一致率 = pass /（总数 − unsupported − not-installed）。
+///
+/// 分母排除"没这个能力"与"未安装"：它们不是失败，也不该把一致率算低
+/// （见 `DESIGN.md` D3）。评审看的就是这个数字。
+pub fn RunSummary::pass_rate(self : RunSummary) -> Double {
+  let judged = self.total - self.unsupported - self.not_installed
+  if judged <= 0 {
+    0.0
+  } else {
+    self.passed.to_double() / judged.to_double()
+  }
+}
+
+///|
+/// 一致率的展示形式（截断到整数百分比）。
+pub fn RunSummary::pass_rate_text(self : RunSummary) -> String {
+  "\{(self.pass_rate() * 100.0).to_int()}%"
 }
 
 ///|
 /// 一行文本，供 CLI 与日志展示。
 pub fn RunSummary::render(self : RunSummary) -> String {
-  "共 \{self.total} · pass \{self.passed} · fail \{self.failed} · errored \{self.errored} · unsupported \{self.failed_unsupported} · not-installed \{self.not_installed}"
+  "共 \{self.total} · pass \{self.passed} · fail \{self.failed} · errored \{self.errored} · unsupported \{self.unsupported} · not-installed \{self.not_installed}"
 }
 
 ///|

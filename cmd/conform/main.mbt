@@ -6,6 +6,10 @@
 ///   moon run cmd/conform -- --impls moonlocale --format markdown
 async fn main {
   let args = @env.args()
+  let format = match flag_value(args, "--format") {
+    Some(value) => value
+    None => "text"
+  }
   let registry = @adapter.AdapterRegistry::new()
   let reference_null = @reference_null.ReferenceNull::new()
   registry.register(
@@ -22,16 +26,21 @@ async fn main {
   let selected_ids = selected.map(info => info.id)
 
   let manifest = @source.load_manifest("fixtures/SOURCES.json")
-  println("cldr-conformance · conform")
-  println("已选择适配器：\{selected.length()}")
-  for info in selected {
+  // json / markdown 是**机器可读**输出：stdout 只能是报告本身，
+  // 否则 `moon run cmd/conform -- --format json > report.json` 得到的不是合法 JSON。
+  let machine_readable = format == "json" || format == "markdown"
+  if !machine_readable {
+    println("cldr-conformance · conform")
+    println("已选择适配器：\{selected.length()}")
+    for info in selected {
+      println(
+        "  \{info.id} · \{info.name} · \{capability_labels(info.capabilities)}",
+      )
+    }
     println(
-      "  \{info.id} · \{info.name} · \{capability_labels(info.capabilities)}",
+      "数据基线 \{manifest.cldr_version}（\{manifest.files.length()} 个文件）",
     )
   }
-  println(
-    "数据基线 \{manifest.cldr_version}（\{manifest.files.length()} 个文件）",
-  )
 
   // ---- 载入用例（同一份文本既用于清点，也用于执行）----
   let decimal_text = @fs.read_file("fixtures/decimal/decimals.tsv").text()
@@ -57,15 +66,17 @@ async fn main {
     skeletons + all_calendars,
     formatted,
   )
-  println(
-    "  数字套件  decimals.tsv                \{decimal.length()} 条用例 / \{decimal.locales().length()} 个语言",
-  )
-  println(
-    "  数字套件  decimals_modern_locales.tsv \{modern.length()} 条用例 / \{modern.locales().length()} 个语言",
-  )
-  println(
-    "  日期套件  \{datetime.skeletons.length()} 条骨架 + \{datetime.formatted.length()} 条格式化 / \{datetime.locales().length()} 个语言 / \{datetime.calendars().length()} 种日历",
-  )
+  if !machine_readable {
+    println(
+      "  数字套件  decimals.tsv                \{decimal.length()} 条用例 / \{decimal.locales().length()} 个语言",
+    )
+    println(
+      "  数字套件  decimals_modern_locales.tsv \{modern.length()} 条用例 / \{modern.locales().length()} 个语言",
+    )
+    println(
+      "  日期套件  \{datetime.skeletons.length()} 条骨架 + \{datetime.formatted.length()} 条格式化 / \{datetime.locales().length()} 个语言 / \{datetime.calendars().length()} 种日历",
+    )
+  }
   // MF2：7 个文件各自带场景与默认值，逐个解析后合并
   let tests_dir = "fixtures/messageFormat/tests"
   let names = [
@@ -82,14 +93,18 @@ async fn main {
       )
   }
   let messages = @conformance.MessageCorpus::new(message_cases)
-  println(
-    "  MF2 套件  \{messages.length()} 条用例 / \{messages.files().length()} 个文件 / \{messages.scenarios().length()} 个场景",
-  )
+  if !machine_readable {
+    println(
+      "  MF2 套件  \{messages.length()} 条用例 / \{messages.files().length()} 个文件 / \{messages.scenarios().length()} 个场景",
+    )
+  }
 
   // ---- 执行（M2 引擎）----
   if selected.length() == 0 {
-    println("没有可执行的适配器；用 --impls <id,...> 指定。")
-    return
+    if !machine_readable {
+      println("没有可执行的适配器；用 --impls <id,...> 指定。")
+      return
+    }
   }
   let config = @engine.EngineConfig::default()
   let mut results : Array[@conformance.CaseResult] = []
@@ -124,31 +139,42 @@ async fn main {
   results = results +
     @engine.run_message(registry, selected_ids, message_cases, config)
 
-  println(
-    "执行结果（\{results.length()} 条结果 = 用例 × 适配器）",
+  let report = @conformance.Report::from_results(
+    manifest.cldr_version,
+    selected_ids,
+    results,
   )
-  for info in selected {
-    let summary = @conformance.RunSummary::from_results(
-      results.filter(result => result.adapter_id == info.id),
-    )
-    println("  \{info.id}: \{summary.render()}")
-  }
-  println(
-    "  合计: \{@conformance.RunSummary::from_results(results).render()}",
-  )
-  let failures = results.filter(result => result.outcome.is_failure())
-  let mut shown = 0
-  for result in failures {
-    if shown < 3 {
-      let label = match result.outcome.reason_label() {
-        Some(reason) => "\{result.outcome.label()} · \{reason}"
-        None => result.outcome.label()
+  match format {
+    "json" => println(report.to_json())
+    "markdown" => println(report.to_markdown())
+    _ => {
+      println(
+        "执行结果（\{results.length()} 条结果 = 用例 × 适配器）",
+      )
+      for info in selected {
+        let summary = @conformance.RunSummary::from_results(
+          results.filter(result => result.adapter_id == info.id),
+        )
+        println(
+          "  \{info.id}: \{summary.render()} · 一致率 \{summary.pass_rate_text()}",
+        )
       }
-      println("    例: \{result.source} \{result.location} · \{label}")
-      shown += 1
+      println("  合计: \{report.summary.render()}")
+      let failures = results.filter(result => result.outcome.is_failure())
+      let mut shown = 0
+      for result in failures {
+        if shown < 3 {
+          let label = match result.outcome.reason_label() {
+            Some(reason) => "\{result.outcome.label()} · \{reason}"
+            None => result.outcome.label()
+          }
+          println("    例: \{result.source} \{result.location} · \{label}")
+          shown += 1
+        }
+      }
+      println("  用 --format json|markdown 输出完整报告")
     }
   }
-  println("  报告输出（JSON / Markdown）：M3 下一步接入")
 }
 
 ///|

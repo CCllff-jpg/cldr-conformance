@@ -8,6 +8,8 @@ import {
 // Values
 pub fn char_diff(String, String) -> CharDiff
 
+pub fn failure_sample_limit() -> Int
+
 // Errors
 
 // Types and methods
@@ -32,6 +34,19 @@ pub fn AdapterCapability::equal(Self, Self) -> Bool
 pub fn AdapterCapability::label(Self) -> String
 pub fn AdapterCapability::not_equal(Self, Self) -> Bool
 pub fn AdapterCapability::to_repr(Self) -> @debug.Repr
+
+pub(all) struct AdapterReport {
+  adapter_id : String
+  summary : RunSummary
+  by_suite : Array[SuiteSummary]
+  by_reason : Array[ReasonCount]
+  failures : Array[FailureDetail]
+  errors : Array[ErrorDetail]
+} derive(Eq, @debug.Debug)
+pub fn AdapterReport::equal(Self, Self) -> Bool
+pub fn AdapterReport::from_results(String, Array[CaseResult]) -> Self
+pub fn AdapterReport::not_equal(Self, Self) -> Bool
+pub fn AdapterReport::to_repr(Self) -> @debug.Repr
 
 pub(all) enum CaseOutcome {
   Pass
@@ -144,6 +159,16 @@ pub fn DecimalCorpus::not_equal(Self, Self) -> Bool
 pub fn DecimalCorpus::of_locale(Self, String) -> Array[DecimalCase]
 pub fn DecimalCorpus::to_repr(Self) -> @debug.Repr
 
+pub(all) struct ErrorDetail {
+  suite : Suite
+  source : String
+  location : String
+  detail : String
+} derive(Eq, @debug.Debug)
+pub fn ErrorDetail::equal(Self, Self) -> Bool
+pub fn ErrorDetail::not_equal(Self, Self) -> Bool
+pub fn ErrorDetail::to_repr(Self) -> @debug.Repr
+
 pub(all) enum FailReason {
   GroupingMismatch
   DigitSystemMismatch
@@ -159,6 +184,19 @@ pub fn FailReason::equal(Self, Self) -> Bool
 pub fn FailReason::label(Self) -> String
 pub fn FailReason::not_equal(Self, Self) -> Bool
 pub fn FailReason::to_repr(Self) -> @debug.Repr
+
+pub(all) struct FailureDetail {
+  suite : Suite
+  source : String
+  location : String
+  reason : FailReason
+  expected : String
+  actual : String
+  diff : CharDiff
+} derive(Eq, @debug.Debug)
+pub fn FailureDetail::equal(Self, Self) -> Bool
+pub fn FailureDetail::not_equal(Self, Self) -> Bool
+pub fn FailureDetail::to_repr(Self) -> @debug.Repr
 
 pub(all) struct MessageCase {
   file : String
@@ -229,11 +267,31 @@ pub fn NumberStyle::equal(Self, Self) -> Bool
 pub fn NumberStyle::not_equal(Self, Self) -> Bool
 pub fn NumberStyle::to_repr(Self) -> @debug.Repr
 
+pub(all) struct ReasonCount {
+  reason : FailReason
+  count : Int
+} derive(Eq, @debug.Debug)
+pub fn ReasonCount::equal(Self, Self) -> Bool
+pub fn ReasonCount::not_equal(Self, Self) -> Bool
+pub fn ReasonCount::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Report {
+  baseline : String
+  adapters : Array[AdapterReport]
+  summary : RunSummary
+} derive(Eq, @debug.Debug)
+pub fn Report::equal(Self, Self) -> Bool
+pub fn Report::from_results(String, Array[String], Array[CaseResult]) -> Self
+pub fn Report::not_equal(Self, Self) -> Bool
+pub fn Report::to_json(Self) -> String
+pub fn Report::to_markdown(Self) -> String
+pub fn Report::to_repr(Self) -> @debug.Repr
+
 pub(all) struct RunSummary {
   total : Int
   passed : Int
   failed : Int
-  failed_unsupported : Int
+  unsupported : Int
   not_installed : Int
   errored : Int
 } derive(Eq, @debug.Debug)
@@ -244,6 +302,8 @@ pub fn RunSummary::failures(Self) -> Int
 pub fn RunSummary::from_results(Array[CaseResult]) -> Self
 pub fn RunSummary::is_clean(Self) -> Bool
 pub fn RunSummary::not_equal(Self, Self) -> Bool
+pub fn RunSummary::pass_rate(Self) -> Double
+pub fn RunSummary::pass_rate_text(Self) -> String
 pub fn RunSummary::render(Self) -> String
 pub fn RunSummary::to_repr(Self) -> @debug.Repr
 
@@ -268,6 +328,14 @@ pub fn Suite::equal(Self, Self) -> Bool
 pub fn Suite::label(Self) -> String
 pub fn Suite::not_equal(Self, Self) -> Bool
 pub fn Suite::to_repr(Self) -> @debug.Repr
+
+pub(all) struct SuiteSummary {
+  suite : Suite
+  summary : RunSummary
+} derive(Eq, @debug.Debug)
+pub fn SuiteSummary::equal(Self, Self) -> Bool
+pub fn SuiteSummary::not_equal(Self, Self) -> Bool
+pub fn SuiteSummary::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
