@@ -47,6 +47,8 @@ pub(all) enum FailReason {
 pub(all) enum CaseOutcome {
   Pass
   Fail(reason~ : FailReason, expected~ : String, actual~ : String)
+  /// 被测实现抛出异常。与 `Fail` 分开记录：**抛异常与答错是两类不同的缺陷**。
+  Errored(detail~ : String)
   Unsupported(feature~ : String)
   NotInstalled
 } derive(Debug, Eq)
@@ -193,5 +195,151 @@ pub fn Suite::label(self : Suite) -> String {
     Decimal => "decimal"
     Datetime => "datetime"
     MessageFormat2 => "message-format-2"
+  }
+}
+
+///|
+/// 结果的稳定标签（报告与 CLI 共用）。
+pub fn CaseOutcome::label(self : CaseOutcome) -> String {
+  match self {
+    Pass => "pass"
+    Fail(_) => "fail"
+    Errored(_) => "errored"
+    Unsupported(_) => "unsupported"
+    NotInstalled => "not-installed"
+  }
+}
+
+///|
+/// 是否属于**真正的一致性失败**（答错或抛异常）。
+/// `unsupported` 与 `not-installed` 不算失败——没有能力不等于做错了（见 `DESIGN.md` D3）。
+pub fn CaseOutcome::is_failure(self : CaseOutcome) -> Bool {
+  match self {
+    Fail(_) => true
+    Errored(_) => true
+    _ => false
+  }
+}
+
+///|
+/// 单条用例在某个适配器上的执行结果，是报告的最小单元。
+pub(all) struct CaseResult {
+  suite : Suite
+  /// 适配器的稳定 ID（不是展示名）。
+  adapter_id : String
+  /// 数据来源文件，例如 `decimals.tsv`、`syntax.json`。
+  source : String
+  /// 在来源中的位置，例如 `L87`、`#12`。
+  location : String
+  outcome : CaseOutcome
+  /// 单用例耗时（毫秒）。
+  elapsed_ms : Int
+} derive(Debug, Eq)
+
+///|
+/// 一次运行的计数汇总。
+pub(all) struct RunSummary {
+  total : Int
+  passed : Int
+  failed : Int
+  failed_unsupported : Int
+  not_installed : Int
+  errored : Int
+} derive(Debug, Eq)
+
+///|
+pub fn RunSummary::empty() -> RunSummary {
+  {
+    total: 0,
+    passed: 0,
+    failed: 0,
+    failed_unsupported: 0,
+    not_installed: 0,
+    errored: 0,
+  }
+}
+
+///|
+/// 统计一批结果。
+pub fn RunSummary::from_results(results : Array[CaseResult]) -> RunSummary {
+  let mut total = 0
+  let mut passed = 0
+  let mut failed = 0
+  let mut unsupported = 0
+  let mut not_installed = 0
+  let mut errored = 0
+  for result in results {
+    total += 1
+    match result.outcome {
+      Pass => passed += 1
+      Fail(_) => failed += 1
+      Errored(_) => errored += 1
+      Unsupported(_) => unsupported += 1
+      NotInstalled => not_installed += 1
+    }
+  }
+  {
+    total,
+    passed,
+    failed,
+    failed_unsupported: unsupported,
+    not_installed,
+    errored,
+  }
+}
+
+///|
+/// 真正的一致性失败数 = 答错 + 抛异常。
+pub fn RunSummary::failures(self : RunSummary) -> Int {
+  self.failed + self.errored
+}
+
+///|
+/// 是否没有任何一致性失败。
+pub fn RunSummary::is_clean(self : RunSummary) -> Bool {
+  self.failures() == 0
+}
+
+///|
+/// 不参与一致性统计的用例数（无能力 + 未选入）。
+pub fn RunSummary::excluded(self : RunSummary) -> Int {
+  self.failed_unsupported + self.not_installed
+}
+
+///|
+/// 一行文本，供 CLI 与日志展示。
+pub fn RunSummary::render(self : RunSummary) -> String {
+  "共 \{self.total} · pass \{self.passed} · fail \{self.failed} · errored \{self.errored} · unsupported \{self.failed_unsupported} · not-installed \{self.not_installed}"
+}
+
+///|
+/// 日期用例 → 适配器输入。**不含期望值与来源信息**，适配器在类型上就拿不到答案
+/// （见 `DESIGN.md` D1「只做裁判，不做选手」）。
+pub fn DatetimeCase::format_input(self : DatetimeCase) -> DatetimeFormatInput {
+  {
+    locale: self.locale,
+    calendar: self.calendar,
+    input: self.input,
+    semantic_skeleton: self.semantic_skeleton,
+    classical_skeleton: self.classical_skeleton,
+    semantic_skeleton_length: self.semantic_skeleton_length,
+    zone_style: self.zone_style,
+    time_length: self.time_length,
+    date_length: self.date_length,
+    hour_cycle: self.hour_cycle,
+    year_style: self.year_style,
+    date_time_format_type: self.date_time_format_type,
+  }
+}
+
+///|
+/// MF2 用例 → 适配器输入。**不含期望输出与期望错误**。
+pub fn MessageCase::format_input(self : MessageCase) -> MessageFormat2Input {
+  {
+    locale: self.locale,
+    source: self.src,
+    bidi_isolation: self.bidi_isolation,
+    tags: self.tags,
+    params_json: self.params_json,
   }
 }

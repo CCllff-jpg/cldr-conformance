@@ -35,12 +35,27 @@ pub fn AdapterCapability::to_repr(Self) -> @debug.Repr
 pub(all) enum CaseOutcome {
   Pass
   Fail(reason~ : FailReason, expected~ : String, actual~ : String)
+  Errored(detail~ : String)
   Unsupported(feature~ : String)
   NotInstalled
 } derive(Eq, @debug.Debug)
 pub fn CaseOutcome::equal(Self, Self) -> Bool
+pub fn CaseOutcome::is_failure(Self) -> Bool
+pub fn CaseOutcome::label(Self) -> String
 pub fn CaseOutcome::not_equal(Self, Self) -> Bool
 pub fn CaseOutcome::to_repr(Self) -> @debug.Repr
+
+pub(all) struct CaseResult {
+  suite : Suite
+  adapter_id : String
+  source : String
+  location : String
+  outcome : CaseOutcome
+  elapsed_ms : Int
+} derive(Eq, @debug.Debug)
+pub fn CaseResult::equal(Self, Self) -> Bool
+pub fn CaseResult::not_equal(Self, Self) -> Bool
+pub fn CaseResult::to_repr(Self) -> @debug.Repr
 
 pub(all) struct DatetimeCase {
   locale : String
@@ -59,6 +74,7 @@ pub(all) struct DatetimeCase {
   index : Int
 } derive(Eq, @debug.Debug)
 pub fn DatetimeCase::equal(Self, Self) -> Bool
+pub fn DatetimeCase::format_input(Self) -> DatetimeFormatInput
 pub fn DatetimeCase::not_equal(Self, Self) -> Bool
 pub fn DatetimeCase::to_repr(Self) -> @debug.Repr
 
@@ -144,6 +160,7 @@ pub(all) struct MessageCase {
   params_json : String?
 } derive(Eq, @debug.Debug)
 pub fn MessageCase::equal(Self, Self) -> Bool
+pub fn MessageCase::format_input(Self) -> MessageFormat2Input
 pub fn MessageCase::not_equal(Self, Self) -> Bool
 pub fn MessageCase::to_repr(Self) -> @debug.Repr
 
@@ -196,6 +213,24 @@ pub(all) enum NumberStyle {
 pub fn NumberStyle::equal(Self, Self) -> Bool
 pub fn NumberStyle::not_equal(Self, Self) -> Bool
 pub fn NumberStyle::to_repr(Self) -> @debug.Repr
+
+pub(all) struct RunSummary {
+  total : Int
+  passed : Int
+  failed : Int
+  failed_unsupported : Int
+  not_installed : Int
+  errored : Int
+} derive(Eq, @debug.Debug)
+pub fn RunSummary::empty() -> Self
+pub fn RunSummary::equal(Self, Self) -> Bool
+pub fn RunSummary::excluded(Self) -> Int
+pub fn RunSummary::failures(Self) -> Int
+pub fn RunSummary::from_results(Array[CaseResult]) -> Self
+pub fn RunSummary::is_clean(Self) -> Bool
+pub fn RunSummary::not_equal(Self, Self) -> Bool
+pub fn RunSummary::render(Self) -> String
+pub fn RunSummary::to_repr(Self) -> @debug.Repr
 
 pub(all) struct SkeletonCase {
   locale : String

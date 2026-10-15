@@ -2,16 +2,26 @@
 package "CCllff-jpg/cldr-conformance/internal/engine"
 
 import {
+  "CCllff-jpg/cldr-conformance",
+  "CCllff-jpg/cldr-conformance/internal/adapter",
   "moonbitlang/core/debug",
 }
 
 // Values
+pub fn run_datetime(@adapter.AdapterRegistry, Array[String], String, Array[@cldr-conformance.DatetimeCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
+
+pub fn run_message(@adapter.AdapterRegistry, Array[String], Array[@cldr-conformance.MessageCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
+
+pub fn run_number(@adapter.AdapterRegistry, Array[String], String, Array[@cldr-conformance.DecimalCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
+
+pub fn run_skeleton(@adapter.AdapterRegistry, Array[String], String, Array[@cldr-conformance.SkeletonCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
 
 // Errors
 
 // Types and methods
 pub(all) struct EngineConfig {
   full : Bool
+  measure : Bool
 } derive(Eq, @debug.Debug)
 pub fn EngineConfig::default() -> Self
 pub fn EngineConfig::equal(Self, Self) -> Bool

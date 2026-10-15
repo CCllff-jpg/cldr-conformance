@@ -105,3 +105,15 @@ pub extend MessageCorpus with @debug.Debug::{to_repr}
 
 ///|
 pub extend MessageCorpus with Eq::{equal, not_equal}
+
+///|
+pub extend CaseResult with @debug.Debug::{to_repr}
+
+///|
+pub extend CaseResult with Eq::{equal, not_equal}
+
+///|
+pub extend RunSummary with @debug.Debug::{to_repr}
+
+///|
+pub extend RunSummary with Eq::{equal, not_equal}

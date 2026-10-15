@@ -1,6 +1,25 @@
-// 执行引擎包（阶段 2 / D5–D7）。
-// 负责用例批量执行、异常隔离、失败归因与最小化。
+// 执行引擎包（M1–M3）。
+// 批量执行用例、隔离异常、记录耗时，产出可归因的结果序列；
+// 失败归因与报告模型在 M3 补齐。
 
 import {
+  "CCllff-jpg/cldr-conformance" @conformance,
+  "CCllff-jpg/cldr-conformance/internal/adapter",
+  "moonbitlang/async",
   "moonbitlang/core/debug",
 }
+
+// 测试需要真实语料与一个可预测的对手方（reference-null），故额外引入两个包。
+import {
+  "CCllff-jpg/cldr-conformance" @conformance,
+  "CCllff-jpg/cldr-conformance/adapters/reference_null",
+  "CCllff-jpg/cldr-conformance/internal/adapter",
+  "CCllff-jpg/cldr-conformance/internal/corpus",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+} for "wbtest"
+
+// 与 internal/corpus、internal/source 一致：本包的测试要读 fixtures/，
+// 而文件系统 API 只在 native 可用（见 DATA-SOURCES.md 与 开发方案.md §3.2）。
+
+supported_targets = "+native"
