@@ -8,6 +8,8 @@ import {
 }
 
 // Values
+pub fn attribute(AttributionContext, String, String) -> @cldr-conformance.FailReason
+
 pub fn run_datetime(@adapter.AdapterRegistry, Array[String], String, Array[@cldr-conformance.DatetimeCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
 
 pub fn run_message(@adapter.AdapterRegistry, Array[String], Array[@cldr-conformance.MessageCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
@@ -19,6 +21,15 @@ pub fn run_skeleton(@adapter.AdapterRegistry, Array[String], String, Array[@cldr
 // Errors
 
 // Types and methods
+pub(all) struct AttributionContext {
+  suite : @cldr-conformance.Suite
+  compact : Bool
+} derive(Eq, @debug.Debug)
+pub fn AttributionContext::equal(Self, Self) -> Bool
+pub fn AttributionContext::new(@cldr-conformance.Suite, compact? : Bool) -> Self
+pub fn AttributionContext::not_equal(Self, Self) -> Bool
+pub fn AttributionContext::to_repr(Self) -> @debug.Repr
+
 pub(all) struct EngineConfig {
   full : Bool
   measure : Bool

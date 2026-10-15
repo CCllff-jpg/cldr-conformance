@@ -117,3 +117,9 @@ pub extend RunSummary with @debug.Debug::{to_repr}
 
 ///|
 pub extend RunSummary with Eq::{equal, not_equal}
+
+///|
+pub extend CharDiff with @debug.Debug::{to_repr}
+
+///|
+pub extend CharDiff with Eq::{equal, not_equal}

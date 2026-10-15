@@ -5,3 +5,9 @@ pub extend EngineConfig with @debug.Debug::{to_repr}
 
 ///|
 pub extend EngineConfig with Eq::{equal, not_equal}
+
+///|
+pub extend AttributionContext with @debug.Debug::{to_repr}
+
+///|
+pub extend AttributionContext with Eq::{equal, not_equal}

@@ -140,13 +140,15 @@ async fn main {
   let mut shown = 0
   for result in failures {
     if shown < 3 {
-      println(
-        "    例: \{result.source} \{result.location} · \{result.outcome.label()}",
-      )
+      let label = match result.outcome.reason_label() {
+        Some(reason) => "\{result.outcome.label()} · \{reason}"
+        None => result.outcome.label()
+      }
+      println("    例: \{result.source} \{result.location} · \{label}")
       shown += 1
     }
   }
-  println("  失败归因与报告输出：M3 接入")
+  println("  报告输出（JSON / Markdown）：M3 下一步接入")
 }
 
 ///|

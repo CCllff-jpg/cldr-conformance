@@ -58,6 +58,7 @@ fn dispatch(
 ///|
 /// 比较期望字符串与实际输出。
 fn evaluate(
+  context : AttributionContext,
   expected : String,
   run : () -> String raise,
 ) -> @conformance.CaseOutcome raise {
@@ -66,7 +67,7 @@ fn evaluate(
     @conformance.CaseOutcome::Pass
   } else {
     @conformance.CaseOutcome::Fail(
-      reason=@conformance.FailReason::Other,
+      reason=attribute(context, expected, actual),
       expected~,
       actual~,
     )
@@ -171,14 +172,21 @@ pub fn run_number(
           () => {
             match registry.number_adapter(adapter_id) {
               Some(adapter) =>
-                evaluate(case.expected, () => {
-                  adapter.format_number(
-                    case.locale,
-                    case.input,
-                    style=case.style,
-                    length=case.length,
-                  )
-                })
+                evaluate(
+                  AttributionContext::new(
+                    @conformance.Suite::Decimal,
+                    compact=case.length != @conformance.NumberLength::Standard,
+                  ),
+                  case.expected,
+                  () => {
+                    adapter.format_number(
+                      case.locale,
+                      case.input,
+                      style=case.style,
+                      length=case.length,
+                    )
+                  },
+                )
               None =>
                 @conformance.CaseOutcome::Errored(
                   detail="适配器未登记数字 handler",
@@ -217,13 +225,17 @@ pub fn run_skeleton(
           () => {
             match registry.datetime_adapter(adapter_id) {
               Some(adapter) =>
-                evaluate(case.pattern, () => {
-                  adapter.format_skeleton(
-                    case.locale,
-                    case.calendar,
-                    case.skeleton,
-                  )
-                })
+                evaluate(
+                  AttributionContext::new(@conformance.Suite::Datetime),
+                  case.pattern,
+                  () => {
+                    adapter.format_skeleton(
+                      case.locale,
+                      case.calendar,
+                      case.skeleton,
+                    )
+                  },
+                )
               None =>
                 @conformance.CaseOutcome::Errored(
                   detail="适配器未登记日期 handler",
@@ -262,9 +274,11 @@ pub fn run_datetime(
           () => {
             match registry.datetime_adapter(adapter_id) {
               Some(adapter) =>
-                evaluate(case.expected, () => {
-                  adapter.format_datetime(case.format_input())
-                })
+                evaluate(
+                  AttributionContext::new(@conformance.Suite::Datetime),
+                  case.expected,
+                  () => adapter.format_datetime(case.format_input()),
+                )
               None =>
                 @conformance.CaseOutcome::Errored(
                   detail="适配器未登记日期 handler",

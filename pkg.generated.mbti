@@ -6,6 +6,7 @@ import {
 }
 
 // Values
+pub fn char_diff(String, String) -> CharDiff
 
 // Errors
 
@@ -43,6 +44,7 @@ pub fn CaseOutcome::equal(Self, Self) -> Bool
 pub fn CaseOutcome::is_failure(Self) -> Bool
 pub fn CaseOutcome::label(Self) -> String
 pub fn CaseOutcome::not_equal(Self, Self) -> Bool
+pub fn CaseOutcome::reason_label(Self) -> String?
 pub fn CaseOutcome::to_repr(Self) -> @debug.Repr
 
 pub(all) struct CaseResult {
@@ -56,6 +58,17 @@ pub(all) struct CaseResult {
 pub fn CaseResult::equal(Self, Self) -> Bool
 pub fn CaseResult::not_equal(Self, Self) -> Bool
 pub fn CaseResult::to_repr(Self) -> @debug.Repr
+
+pub(all) struct CharDiff {
+  index : Int
+  expected_snippet : String
+  actual_snippet : String
+  expected_length : Int
+  actual_length : Int
+} derive(Eq, @debug.Debug)
+pub fn CharDiff::equal(Self, Self) -> Bool
+pub fn CharDiff::not_equal(Self, Self) -> Bool
+pub fn CharDiff::to_repr(Self) -> @debug.Repr
 
 pub(all) struct DatetimeCase {
   locale : String
@@ -141,7 +154,9 @@ pub(all) enum FailReason {
   PatternSyntaxUnsupported
   Other
 } derive(Eq, @debug.Debug)
+pub fn FailReason::all() -> Array[Self]
 pub fn FailReason::equal(Self, Self) -> Bool
+pub fn FailReason::label(Self) -> String
 pub fn FailReason::not_equal(Self, Self) -> Bool
 pub fn FailReason::to_repr(Self) -> @debug.Repr
 

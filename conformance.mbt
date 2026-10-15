@@ -222,6 +222,15 @@ pub fn CaseOutcome::is_failure(self : CaseOutcome) -> Bool {
 }
 
 ///|
+/// 失败原因的稳定标识；不是 `Fail` 时返回 `None`。
+pub fn CaseOutcome::reason_label(self : CaseOutcome) -> String? {
+  match self {
+    Fail(reason~, ..) => Some(reason.label())
+    _ => None
+  }
+}
+
+///|
 /// 单条用例在某个适配器上的执行结果，是报告的最小单元。
 pub(all) struct CaseResult {
   suite : Suite
