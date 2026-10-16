@@ -10,9 +10,15 @@ import {
 // Values
 pub fn attribute(AttributionContext, String, String) -> @cldr-conformance.FailReason
 
+pub fn attribute_all(AttributionContext, String, String) -> Array[@cldr-conformance.FailReason]
+
+pub fn compound_matrix(Array[String]) -> Array[CompoundOutcome]
+
 pub fn mutate(MutationKind, String) -> String?
 
 pub fn mutation_matrix(Array[String]) -> Array[MutationOutcome]
+
+pub fn render_compound_matrix(Array[CompoundOutcome]) -> String
 
 pub fn render_mutation_matrix(Array[MutationOutcome]) -> String
 
@@ -35,6 +41,22 @@ pub fn AttributionContext::equal(Self, Self) -> Bool
 pub fn AttributionContext::new(@cldr-conformance.Suite, compact? : Bool) -> Self
 pub fn AttributionContext::not_equal(Self, Self) -> Bool
 pub fn AttributionContext::to_repr(Self) -> @debug.Repr
+
+pub(all) struct CompoundOutcome {
+  first : MutationKind
+  second : MutationKind
+  applied : Int
+  hit_either : Int
+  hit_other : Int
+  hit_unrelated : Int
+  attributed : Array[@cldr-conformance.ReasonCount]
+  sample : String?
+} derive(Eq, @debug.Debug)
+pub fn CompoundOutcome::equal(Self, Self) -> Bool
+pub fn CompoundOutcome::hit_rate(Self) -> Double
+pub fn CompoundOutcome::hit_rate_text(Self) -> String
+pub fn CompoundOutcome::not_equal(Self, Self) -> Bool
+pub fn CompoundOutcome::to_repr(Self) -> @debug.Repr
 
 pub(all) struct EngineConfig {
   full : Bool

@@ -425,6 +425,183 @@ pub fn mutation_matrix(
 }
 
 ///|
+/// 把两种注入依次作用在同一条期望值上（模拟真实实现"同时错好几处"）。
+/// 任一步不适用就返回 `None`。
+fn apply_pair(
+  first : MutationKind,
+  second : MutationKind,
+  expected : String,
+) -> String? {
+  match mutate(first, expected) {
+    None => None
+    Some(once) =>
+      match mutate(second, once) {
+        None => None
+        Some(twice) => if twice == expected { None } else { Some(twice) }
+      }
+  }
+}
+
+///|
+/// 复合注入下应采用的归因上下文。
+///
+/// 两处错误可能分别属于不同套件（例如"改复数词形" + "丢分组符"），
+/// 这里取并集：出现复数注入按 MF2 语境，出现紧凑注入按紧凑语境。
+fn compound_context(
+  first : MutationKind,
+  second : MutationKind,
+) -> AttributionContext {
+  if first == PluralizeWord || second == PluralizeWord {
+    AttributionContext::new(@conformance.Suite::MessageFormat2)
+  } else if first == ChangeCompactForm || second == ChangeCompactForm {
+    AttributionContext::new(@conformance.Suite::Decimal, compact=true)
+  } else {
+    AttributionContext::new(@conformance.Suite::Decimal)
+  }
+}
+
+///|
+/// 两处同时出错时的成绩。
+pub(all) struct CompoundOutcome {
+  first : MutationKind
+  second : MutationKind
+  applied : Int
+  /// 归因命中"这两处之一"的条数（复合失败的合理判定）。
+  hit_either : Int
+  /// 落到 `other` 的条数（保守兜底）。
+  hit_other : Int
+  /// 落到与两者都无关的类别的条数（**真正需要关注的误判**）。
+  hit_unrelated : Int
+  attributed : Array[@conformance.ReasonCount]
+  sample : String?
+} derive(Debug, Eq)
+
+///|
+pub fn CompoundOutcome::hit_rate(self : CompoundOutcome) -> Double {
+  if self.applied == 0 {
+    return 0.0
+  }
+  self.hit_either.to_double() / self.applied.to_double()
+}
+
+///|
+pub fn CompoundOutcome::hit_rate_text(self : CompoundOutcome) -> String {
+  "\{(self.hit_rate() * 100.0).to_int()}%"
+}
+
+///|
+fn compound_outcome(
+  first : MutationKind,
+  second : MutationKind,
+  expected_values : Array[String],
+) -> CompoundOutcome {
+  let context = compound_context(first, second)
+  let observed : Array[@conformance.FailReason] = []
+  let mut applied = 0
+  let mut hit_either = 0
+  let mut hit_other = 0
+  let mut hit_unrelated = 0
+  let mut sample : String? = None
+  for expected in expected_values {
+    match apply_pair(first, second, expected) {
+      None => ()
+      Some(actual) =>
+        if actual != expected {
+          applied += 1
+          // 复合场景用**完整原因集**判断：命中两者之一即算还原。
+          let reasons = attribute_all(context, expected, actual)
+          let is_first = reasons.contains(first.intended_reason())
+          let is_second = reasons.contains(second.intended_reason())
+          if is_first || is_second {
+            hit_either += 1
+          } else if reasons[0] == @conformance.FailReason::Other {
+            hit_other += 1
+          } else {
+            hit_unrelated += 1
+          }
+          observed.push(reasons[0])
+          if sample is None {
+            sample = Some("\{expected} → \{actual}")
+          }
+        }
+    }
+  }
+  let attributed : Array[@conformance.ReasonCount] = []
+  for reason in @conformance.FailReason::all() {
+    let mut count = 0
+    for item in observed {
+      if item == reason {
+        count += 1
+      }
+    }
+    if count > 0 {
+      attributed.push({ reason, count, })
+    }
+  }
+  {
+    first,
+    second,
+    applied,
+    hit_either,
+    hit_other,
+    hit_unrelated,
+    attributed,
+    sample,
+  }
+}
+
+///|
+/// 全部两两组合的复合注入实验（只测 i < j，避免重复）。
+pub fn compound_matrix(
+  expected_values : Array[String],
+) -> Array[CompoundOutcome] {
+  let kinds = MutationKind::all()
+  let outcomes : Array[CompoundOutcome] = []
+  let mut i = 0
+  while i < kinds.length() {
+    let mut j = i + 1
+    while j < kinds.length() {
+      outcomes.push(compound_outcome(kinds[i], kinds[j], expected_values))
+      j += 1
+    }
+    i += 1
+  }
+  outcomes
+}
+
+///|
+/// 渲染复合注入实验：逐对给出"命中两者之一 / 落到 other / 落到无关类别"。
+pub fn render_compound_matrix(outcomes : Array[CompoundOutcome]) -> String {
+  let out = StringBuilder()
+  out.write_string(
+    "| 复合注入（同时错两处） | 可应用 | 命中其一 | 命中率 | 落到 other | 落到无关类别 |\n",
+  )
+  out.write_string("|---|---|---|---|---|---|\n")
+  let mut applied_total = 0
+  let mut hit_total = 0
+  let mut other_total = 0
+  let mut unrelated_total = 0
+  for outcome in outcomes {
+    applied_total += outcome.applied
+    hit_total += outcome.hit_either
+    other_total += outcome.hit_other
+    unrelated_total += outcome.hit_unrelated
+    out.write_string(
+      "| `\{outcome.first.label()}` + `\{outcome.second.label()}` | \{outcome.applied} | \{outcome.hit_either} | \{outcome.hit_rate_text()} | \{outcome.hit_other} | \{outcome.hit_unrelated} |\n",
+    )
+  }
+  let rate = if applied_total == 0 {
+    "0%"
+  } else {
+    "\{((hit_total.to_double() / applied_total.to_double()) * 100.0).to_int()}%"
+  }
+  out.write_string(
+    "\n合计：\{hit_total}/\{applied_total} 命中其一（**\{rate}**）；落到 `other` \{other_total}；落到无关类别 \{unrelated_total}。\n",
+  )
+  out.to_string()
+}
+
+///|
 /// 把对照实验结果渲染成 Markdown（可直接贴进说明文档）。
 pub fn render_mutation_matrix(outcomes : Array[MutationOutcome]) -> String {
   let out = StringBuilder()

@@ -18,13 +18,11 @@ pub fn AttributionContext::new(
 }
 
 ///|
-/// 分隔符的处理方式（三级，逐级放宽）。
+/// 分隔符的处理方式。
 priv enum SeparatorMode {
   /// 分隔符必须逐字符相同。
   Keep
-  /// 分隔符位置必须一致，但**允许字符不同**（`1,234` ↔ `1.234` 这类区域差异）。
-  Canonical
-  /// 直接忽略分隔符（用于判断"是否只差分组"）。
+  /// 直接忽略分隔符（用于判断"是否只差分隔符"）。
   Drop
 }
 
@@ -142,7 +140,6 @@ fn equivalent(
   map_digits : Bool,
 ) -> Bool {
   let drop = separators is Drop
-  let canonical = separators is Canonical
   let mut i = 0
   let mut j = 0
   while i < expected.length() && j < actual.length() {
@@ -153,12 +150,7 @@ fn equivalent(
     }
     let left = unit_at(expected, i)
     let right = unit_at(actual, j)
-    if canonical && (is_separator(left) || is_separator(right)) {
-      // 位置必须一致：一边是分隔符而另一边不是 → 不等价
-      if !(is_separator(left) && is_separator(right)) {
-        return false
-      }
-    } else if map_digits {
+    if map_digits {
       match (digit_value(left), digit_value(right)) {
         (Some(a), Some(b)) => if a != b { return false }
         (None, None) => if left != right { return false }
@@ -183,6 +175,44 @@ fn digit_skeleton(text : String) -> String {
     match digit_value(unit_at(text, index)) {
       Some(value) => out.write_string(value.to_string())
       None => ()
+    }
+    index += 1
+  }
+  out.to_string()
+}
+
+///|
+/// 形状串：数字 → `d`，分隔符 → `s`，双向控制符忽略，其余原样。
+///
+/// 用来区分"差异是结构性的（分隔符位置/文字不同）"还是"仅字符字形不同"。
+fn shape_of(text : String) -> String {
+  let out = StringBuilder()
+  let mut index = 0
+  while index < text.length() {
+    let unit = unit_at(text, index)
+    if is_bidi_control(unit) {
+      ()
+    } else if digit_value(unit) is Some(_) {
+      out.write_string("d")
+    } else if is_separator(unit) {
+      out.write_string("s")
+    } else {
+      out.write_substring(text, index, 1)
+    }
+    index += 1
+  }
+  out.to_string()
+}
+
+///|
+/// 分隔符字符序列（忽略双向控制符）。用来判断"分隔符字形是否被换过"。
+fn separator_glyphs(text : String) -> String {
+  let out = StringBuilder()
+  let mut index = 0
+  while index < text.length() {
+    let unit = unit_at(text, index)
+    if is_separator(unit) && !is_bidi_control(unit) {
+      out.write_substring(text, index, 1)
     }
     index += 1
   }
@@ -251,32 +281,68 @@ fn is_grouping_role(text : String, index : Int) -> Bool {
 /// 依据**首个差异位置**上的分隔符角色，而不是整串的形状：
 /// `-1 230,05` → `-1 23005` 里被删掉的是小数点，尽管这串里也有分组符。
 fn separator_diff_is_grouping(expected : String, actual : String) -> Bool {
-  let limit = if expected.length() < actual.length() {
-    expected.length()
-  } else {
-    actual.length()
-  }
-  let mut index = 0
-  while index < limit {
-    if expected[index] != actual[index] {
+  // 定位**忽略双向控制符后**的首个差异：否则 U+200E 之类会把差异位置顶偏。
+  let mut i = 0
+  let mut j = 0
+  while i < expected.length() && j < actual.length() {
+    i = skip_ignorable(expected, i, true, false)
+    j = skip_ignorable(actual, j, true, false)
+    if i >= expected.length() || j >= actual.length() {
       break
     }
-    index += 1
+    if expected[i] != actual[j] {
+      break
+    }
+    i += 1
+    j += 1
   }
-  if index < expected.length() && is_separator(unit_at(expected, index)) {
-    return is_grouping_role(expected, index)
+  if i < expected.length() && is_separator(unit_at(expected, i)) {
+    return is_grouping_role(expected, i)
   }
-  if index < actual.length() && is_separator(unit_at(actual, index)) {
-    return is_grouping_role(actual, index)
+  if j < actual.length() && is_separator(unit_at(actual, j)) {
+    return is_grouping_role(actual, j)
   }
   looks_grouped(expected) || looks_grouped(actual)
 }
 
 ///|
-/// 是否含"文字性内容"（字母 / 汉字 / 货币符号等）。
+/// 是否"像字母"：ASCII 字母，或基本多文种平面里常见的字母区块。
 ///
-/// 用于区分"同一个数字换了说法"（复数词形、紧凑缩写）与"数字本身不同"。
-fn has_text_content(text : String) -> Bool {
+/// 刻意**排除 ASCII 标点**：`{|42|}` 这类的括号不属于"文字内容"，
+/// 否则会把"语法结构差异"误判成复数词形差异（踩过这个坑）。
+fn is_letterish(unit : Int) -> Bool {
+  if is_ascii_letter(unit) {
+    return true
+  }
+  // 拉丁扩展 / 希腊 / 西里尔 / 希伯来 / 阿拉伯 / 天城文 / 孟加拉 / 泰 / 藏 / 缅甸 …
+  if unit > 0x00BF && unit < 0x2000 {
+    return digit_value(unit) is None && !is_separator(unit)
+  }
+  // 假名 / CJK 部首 / CJK 统一表意 / 谚文
+  (unit >= 0x3040 && unit <= 0x30FF) ||
+  (unit >= 0x2E80 && unit <= 0x9FFF) ||
+  (unit >= 0xAC00 && unit <= 0xD7AF)
+}
+
+///|
+/// 是否含字母性内容（用于判断"同一个数字换了说法"：复数词形、紧凑缩写）。
+fn has_letter_content(text : String) -> Bool {
+  let mut index = 0
+  while index < text.length() {
+    if is_letterish(unit_at(text, index)) {
+      return true
+    }
+    index += 1
+  }
+  false
+}
+
+///|
+/// 是否"纯数值形态"：每个码元都是数字、分隔符、符号或双向控制符。
+///
+/// 用于"精度/舍入"这类只该在纯数值之间成立的判断：
+/// `{|42|}` 与 `42` 虽然数字骨架相同，但不是同一类东西，不该判成舍入问题。
+fn is_numeric_like(text : String) -> Bool {
   let mut index = 0
   while index < text.length() {
     let unit = unit_at(text, index)
@@ -287,11 +353,11 @@ fn has_text_content(text : String) -> Bool {
       unit != 0x002B &&
       unit != 0x002D &&
       unit != 0x2212 {
-      return true
+      return false
     }
     index += 1
   }
-  false
+  true
 }
 
 ///|
@@ -321,12 +387,25 @@ fn looks_grouped(text : String) -> Bool {
 }
 
 ///|
-/// 是否像**未展开的模式**（`#,##0.00`、`{0}`）而不是格式化结果。
-fn looks_like_pattern(text : String) -> Bool {
+/// 是否含 LDML 的数字占位符 `#`（模式语法里最明确的标记）。
+fn has_hash(text : String) -> Bool {
+  let mut index = 0
+  while index < text.length() {
+    if unit_at(text, index) == 0x0023 {
+      return true
+    }
+    index += 1
+  }
+  false
+}
+
+///|
+/// 是否含花括号（模式占位符 `{0}`，或 MF2 的标记/fallback 语法）。
+fn has_brace(text : String) -> Bool {
   let mut index = 0
   while index < text.length() {
     let unit = unit_at(text, index)
-    if unit == 0x0023 || unit == 0x007B || unit == 0x007D {
+    if unit == 0x007B || unit == 0x007D {
       return true
     }
     index += 1
@@ -351,67 +430,110 @@ fn is_prefix_of(shorter : String, longer : String) -> Bool {
 }
 
 ///|
-/// 归因：判断这条失败**最可能**属于哪一类。
+/// 归因（完整版）：**独立**检验每个维度是否构成差异，可能给出多个原因。
 ///
-/// 规则按证据强度排序，且**保守优先**：只有能证明"只差这一类"时才给出具体类别，
-/// 否则一律 `Other`。宁可说"不确定"，也不给上游一个错误结论（见 `DESIGN.md` D5）。
+/// 与"首个匹配即返回"相比，这里回答的是"**哪些**维度不同"，
+/// 因此能表达复合失败（例如同时用错数字系统、又丢了小数点）——
+/// 真实实现经常一次错好几处，只报一个原因会误导修复方向。
 ///
+/// 返回顺序即优先级（第一个是主因）；无法证明任何具体维度时返回 `[Other]`。
 /// 调用前提：`expected != actual`（相等即 `Pass`，不应进入归因）。
+pub fn attribute_all(
+  context : AttributionContext,
+  expected : String,
+  actual : String,
+) -> Array[@conformance.FailReason] {
+  let reasons : Array[@conformance.FailReason] = []
+  // 兜底：相等串不该走到归因。若不拦，"忽略双向控制符后等价"会误判成
+  // BidiControlMissing。
+  if expected == actual {
+    return [@conformance.FailReason::Other]
+  }
+  // 双向控制符是**唯一**差异
+  if equivalent(expected, actual, true, Keep, false) {
+    reasons.push(@conformance.FailReason::BidiControlMissing)
+  }
+  // 未展开的模式：实际输出出现了模式语法，而期望值里**没有**。
+  //
+  // 优先级排在维度分析**之前**：返回模式原文是很强的证据，应当作为主因，
+  // 否则在非 ASCII 数字区域（如 `۰`）会被"数字字形不同"抢走主因。
+  //
+  // 判据按标记分别比较，而不是"含任一种模式字符"：
+  //  - `#` 是 LDML 数字占位符，出现即说明返回了模式原文；
+  //  - `{`/`}` 在 MF2 里是正常语法（`{|...|}` 是 CLDR 的期望输出），
+  //    因此只有"实际有、期望没有"时才算未展开。
+  if (has_hash(actual) && !has_hash(expected)) ||
+    (has_brace(actual) && !has_brace(expected)) {
+    reasons.push(@conformance.FailReason::PatternSyntaxUnsupported)
+  }
+  // 数字系统：数字**值序列相同**但**字形不同**
+  if digit_glyphs_differ(expected, actual) &&
+    digit_skeleton(expected) == digit_skeleton(actual) {
+    reasons.push(@conformance.FailReason::DigitSystemMismatch)
+  }
+  // 分隔符差异：
+  //  - 形状相同 → 只是分隔符**字形**被换了区域字符
+  //  - 形状不同但忽略分隔符后相等 → 分隔符的**存在性**不同，
+  //    再按首个差异位置判断是丢分组还是丢小数点
+  if shape_of(expected) == shape_of(actual) {
+    if separator_glyphs(expected) != separator_glyphs(actual) {
+      reasons.push(@conformance.FailReason::GroupingMismatch)
+    }
+  } else if equivalent(expected, actual, true, Drop, true) {
+    if separator_diff_is_grouping(expected, actual) {
+      reasons.push(@conformance.FailReason::GroupingMismatch)
+    } else {
+      reasons.push(@conformance.FailReason::RoundingMismatch)
+    }
+  }
+  let expected_digits = digit_skeleton(expected)
+  let actual_digits = digit_skeleton(actual)
+  let prefix_related = is_prefix_of(expected_digits, actual_digits) ||
+    is_prefix_of(actual_digits, expected_digits)
+  // 数字相同、文字不同 → 复数词形或紧凑缩写
+  if expected_digits != "" &&
+    expected_digits == actual_digits &&
+    (has_letter_content(expected) || has_letter_content(actual)) {
+    reasons.push(
+      if context.compact {
+        @conformance.FailReason::CompactFormMismatch
+      } else {
+        @conformance.FailReason::PluralCategoryMismatch
+      },
+    )
+  }
+  // 紧凑格式：骨架互为前缀（1.2K vs 1200）
+  if context.compact &&
+    prefix_related &&
+    !reasons.contains(@conformance.FailReason::CompactFormMismatch) {
+    reasons.push(@conformance.FailReason::CompactFormMismatch)
+  }
+  // 纯数值且数字骨架不同但互为前缀 → 精度 / 舍入
+  //
+  // 要求骨架**确实不同**：`1,234` ↔ `1234` 的骨架相同，
+  // 差异根本不在数字上，不该再加一条"舍入"。
+  if is_numeric_like(expected) &&
+    is_numeric_like(actual) &&
+    expected_digits != actual_digits &&
+    prefix_related &&
+    !reasons.contains(@conformance.FailReason::RoundingMismatch) {
+    reasons.push(@conformance.FailReason::RoundingMismatch)
+  }
+  if reasons.length() == 0 {
+    reasons.push(@conformance.FailReason::Other)
+  }
+  reasons
+}
+
+///|
+/// 归因（主因）：`attribute_all` 的第一项。
+///
+/// 报告里的"原因分布"按主因统计；需要看复合原因时用 `attribute_all`
+/// （例如同一条用例同时有数字系统与分隔符问题）。
 pub fn attribute(
   context : AttributionContext,
   expected : String,
   actual : String,
 ) -> @conformance.FailReason {
-  // 0) 兜底：相等串不该走到归因。若不拦，"忽略双向控制符后等价"会误判成
-  //    BidiControlMissing。
-  if expected == actual {
-    return @conformance.FailReason::Other
-  }
-  // 1) 只差双向控制符
-  if equivalent(expected, actual, true, Keep, false) {
-    return @conformance.FailReason::BidiControlMissing
-  }
-  // 2) 只差数字系统：必须**数字字形真的不同**，否则
-  //    `১২,৩৪` ↔ `১২.৩৪`（只换了分隔符字符）会被误判成数字系统问题。
-  if digit_glyphs_differ(expected, actual) &&
-    equivalent(expected, actual, true, Canonical, true) {
-    return @conformance.FailReason::DigitSystemMismatch
-  }
-  // 3) 只差分隔符：再看差的是分组符还是小数点（按首个差异位置判断）
-  if equivalent(expected, actual, true, Drop, true) {
-    return if separator_diff_is_grouping(expected, actual) {
-      @conformance.FailReason::GroupingMismatch
-    } else {
-      @conformance.FailReason::RoundingMismatch
-    }
-  }
-  // 4) 返回了未展开的模式。数字与日期套件里 pattern 是常态；
-  //    MF2 的 `{|...|}` 是正常输出，故排除该套件。
-  if context.suite != @conformance.Suite::MessageFormat2 &&
-    looks_like_pattern(actual) {
-    return @conformance.FailReason::PatternSyntaxUnsupported
-  }
-  let expected_digits = digit_skeleton(expected)
-  let actual_digits = digit_skeleton(actual)
-  // 5) 数字相同、文字不同 → 复数词形或紧凑缩写
-  if expected_digits != "" &&
-    expected_digits == actual_digits &&
-    (has_text_content(expected) || has_text_content(actual)) {
-    return if context.compact {
-      @conformance.FailReason::CompactFormMismatch
-    } else {
-      @conformance.FailReason::PluralCategoryMismatch
-    }
-  }
-  let prefix_related = is_prefix_of(expected_digits, actual_digits) ||
-    is_prefix_of(actual_digits, expected_digits)
-  // 6) 紧凑格式用例：数字骨架互为前缀（1.2K vs 1200）
-  if context.compact && prefix_related {
-    return @conformance.FailReason::CompactFormMismatch
-  }
-  // 7) 纯数字且互为前缀 → 精度 / 舍入
-  if !has_text_content(expected) && !has_text_content(actual) && prefix_related {
-    return @conformance.FailReason::RoundingMismatch
-  }
-  @conformance.FailReason::Other
+  attribute_all(context, expected, actual)[0]
 }

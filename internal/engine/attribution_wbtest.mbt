@@ -80,7 +80,7 @@ test "规则 3：只差分组/小数分隔符 → GroupingMismatch" {
 }
 
 ///|
-test "规则 4：返回未展开的模式 → PatternSyntaxUnsupported（MF2 除外）" {
+test "规则 4：返回未展开的模式 → PatternSyntaxUnsupported" {
   assert_eq(
     attribute(decimal_context(), "1,234.00", "#,##0.00"),
     @conformance.FailReason::PatternSyntaxUnsupported,
@@ -89,9 +89,23 @@ test "规则 4：返回未展开的模式 → PatternSyntaxUnsupported（MF2 除
     attribute(decimal_context(), "2026-10-15", "{0}-{1}-{2}"),
     @conformance.FailReason::PatternSyntaxUnsupported,
   )
-  // MF2 的 `{|...|}` 是正常输出，不应被判成模式语法问题
+  // MF2 里输出 `{|...|}`（fallback 语法）同样是返回了未处理的语法
   assert_eq(
     attribute(message_context(), "abc", "{|x|}"),
+    @conformance.FailReason::PatternSyntaxUnsupported,
+  )
+}
+
+///|
+/// 反向保护：**期望值本身**含模式语法时（MF2 的 `{|...|}` 是 CLDR 的正常期望输出），
+/// 不能把实现的普通输出判成"未展开模式"。
+test "期望值本身含模式语法时不归为未展开模式" {
+  assert_eq(
+    attribute(message_context(), "{|42|}", "42"),
+    @conformance.FailReason::Other,
+  )
+  assert_eq(
+    attribute(message_context(), "{#tag u:id=x}content", "content"),
     @conformance.FailReason::Other,
   )
 }

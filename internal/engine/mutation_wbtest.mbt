@@ -76,6 +76,59 @@ test "对照实验矩阵可渲染为 Markdown" {
 }
 
 ///|
+/// 复合失败必须给出**多个**原因，而不是只报一个：
+/// 真实实现经常一次错好几处，只报一个会误导修复方向。
+test "复合失败给出多个原因（数字系统 + 分组符）" {
+  let context = AttributionContext::new(@conformance.Suite::Decimal)
+  let reasons = attribute_all(context, "1,234", "١٢٣٤")
+  assert_true(reasons.contains(@conformance.FailReason::DigitSystemMismatch))
+  assert_true(reasons.contains(@conformance.FailReason::GroupingMismatch))
+  // 主因是优先级最高的那个，且与 attribute_all 的首项一致
+  assert_eq(attribute(context, "1,234", "١٢٣٤"), reasons[0])
+}
+
+///|
+test "单一原因时 attribute_all 只返回一项" {
+  let context = AttributionContext::new(@conformance.Suite::Decimal)
+  assert_eq(attribute_all(context, "1,234", "1234"), [
+    @conformance.FailReason::GroupingMismatch,
+  ])
+  assert_eq(attribute_all(context, "abc", "xyz"), [
+    @conformance.FailReason::Other,
+  ])
+}
+
+///|
+/// 复合对照实验的回归防线：两处同时出错时归因必须命中其一
+///（实测 28 对组合、全语料 100%，掉下来就说明规则被改坏了）。
+async test "真实语料上的复合注入：命中率必须保持满值" {
+  let decimal = @corpus.decimal_corpus_from_tsv(
+    @fs.read_file("fixtures/decimal/decimals.tsv").text(),
+  )
+  let outcomes = compound_matrix(decimal.cases.map(case => case.expected))
+  let mut applied = 0
+  let mut hit = 0
+  for outcome in outcomes {
+    applied += outcome.applied
+    hit += outcome.hit_either
+    if outcome.applied > 0 {
+      assert_eq(outcome.hit_rate_text(), "100%")
+    }
+  }
+  // 225 条语料上仍应有足够多的复合样本生效
+  assert_true(applied > 100)
+  assert_eq(hit, applied)
+}
+
+///|
+test "复合实验矩阵可渲染为 Markdown" {
+  let outcomes = compound_matrix(["1,234", "1.2", "1234"])
+  let markdown = render_compound_matrix(outcomes)
+  assert_true(markdown.contains("| 复合注入（同时错两处） |"))
+  assert_true(markdown.contains("命中其一"))
+}
+
+///|
 /// 诊断用：打印各类注入的未命中样例（用于定位规则缺陷，不参与断言）。
 async test "诊断：未命中样例" {
   let decimal = @corpus.decimal_corpus_from_tsv(

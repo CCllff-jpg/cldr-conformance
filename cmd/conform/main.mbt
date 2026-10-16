@@ -123,6 +123,11 @@ async fn main {
       "方法：每种注入只破坏一个维度，\"正确答案\"由构造决定，看归因能否还原。\n",
     )
     println(@engine.render_mutation_matrix(@engine.mutation_matrix(corpus)))
+    println("\n## 复合注入（同时错两处）\n")
+    println(
+      "真实实现常同时错好几处。复合场景下「命中其一」即为合理判定；\n落到 other 是保守兜底，落到**无关类别**才是需要关注的误判。\n",
+    )
+    println(@engine.render_compound_matrix(@engine.compound_matrix(corpus)))
     return
   }
 

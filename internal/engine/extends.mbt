@@ -23,3 +23,9 @@ pub extend MutationOutcome with @debug.Debug::{to_repr}
 
 ///|
 pub extend MutationOutcome with Eq::{equal, not_equal}
+
+///|
+pub extend CompoundOutcome with @debug.Debug::{to_repr}
+
+///|
+pub extend CompoundOutcome with Eq::{equal, not_equal}
