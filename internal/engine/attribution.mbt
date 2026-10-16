@@ -190,20 +190,86 @@ fn digit_skeleton(text : String) -> String {
 }
 
 ///|
-/// 是否含**非 ASCII 数字**（即实现用了另一套数字系统）。
-///
-/// 这个判据很关键：`1,234` ↔ `1.234` 只是分隔符的区域差异，不该算数字系统问题；
-/// 只有真的出现了其它数字系统的字符，才归为 `DigitSystemMismatch`。
-fn has_non_ascii_digit(text : String) -> Bool {
+/// 提取数字的**字形**序列（码元本身，忽略分隔符）。
+fn digit_glyphs(text : String) -> Array[Int] {
+  let glyphs : Array[Int] = []
   let mut index = 0
   while index < text.length() {
     let unit = unit_at(text, index)
-    if digit_value(unit) is Some(_) && !is_ascii_digit(unit) {
+    if digit_value(unit) is Some(_) {
+      glyphs.push(unit)
+    }
+    index += 1
+  }
+  glyphs
+}
+
+///|
+/// 两侧的数字**字形**是否真的不同。
+///
+/// 这是数字系统归因的判据：`1,234` ↔ `١,٢٣٤` 是（换了数字系统），
+/// 而 `১২,৩৪` ↔ `১২.৩৪` 不是（数字一字未变，只是分隔符换了字符）。
+/// 若只用"出现了非 ASCII 数字"当判据，后者会被误判成数字系统问题。
+fn digit_glyphs_differ(expected : String, actual : String) -> Bool {
+  let left = digit_glyphs(expected)
+  let right = digit_glyphs(actual)
+  if left.length() != right.length() {
+    return false
+  }
+  let mut index = 0
+  while index < left.length() {
+    if left[index] != right[index] {
       return true
     }
     index += 1
   }
   false
+}
+
+///|
+/// 分隔符的角色：`true` = 分组符，`false` = 小数点。
+///
+/// 其后还有内容（另一个分隔符或更多数字）→ 只能是分组符；
+/// 其后直到串尾是 3 位数字 → 按分组符处理（CLDR 里整数用分组）；
+/// 其后直到串尾是 1–2 位数字 → 小数点。
+fn is_grouping_role(text : String, index : Int) -> Bool {
+  let mut digits = 0
+  let mut cursor = index + 1
+  while cursor < text.length() && digit_value(unit_at(text, cursor)) is Some(_) {
+    digits += 1
+    cursor += 1
+  }
+  if cursor < text.length() {
+    return true
+  }
+  digits == 3
+}
+
+///|
+/// 在"只差分隔符"的失败里，判断差异出在分组符还是小数点。
+///
+/// 依据**首个差异位置**上的分隔符角色，而不是整串的形状：
+/// `-1 230,05` → `-1 23005` 里被删掉的是小数点，尽管这串里也有分组符。
+fn separator_diff_is_grouping(expected : String, actual : String) -> Bool {
+  let limit = if expected.length() < actual.length() {
+    expected.length()
+  } else {
+    actual.length()
+  }
+  let mut index = 0
+  while index < limit {
+    if expected[index] != actual[index] {
+      break
+    }
+    index += 1
+  }
+  if index < expected.length() && is_separator(unit_at(expected, index)) {
+    return is_grouping_role(expected, index)
+  }
+  if index < actual.length() && is_separator(unit_at(actual, index)) {
+    return is_grouping_role(actual, index)
+  }
+  looks_grouped(expected) || looks_grouped(actual)
 }
 
 ///|
@@ -305,15 +371,15 @@ pub fn attribute(
   if equivalent(expected, actual, true, Keep, false) {
     return @conformance.FailReason::BidiControlMissing
   }
-  // 2) 只差数字系统：必须**真的出现**非 ASCII 数字，
-  //    否则 `1,234` ↔ `1.234` 会被误判成数字系统问题。
-  if (has_non_ascii_digit(expected) || has_non_ascii_digit(actual)) &&
+  // 2) 只差数字系统：必须**数字字形真的不同**，否则
+  //    `১২,৩৪` ↔ `১২.৩৪`（只换了分隔符字符）会被误判成数字系统问题。
+  if digit_glyphs_differ(expected, actual) &&
     equivalent(expected, actual, true, Canonical, true) {
     return @conformance.FailReason::DigitSystemMismatch
   }
-  // 3) 只差分隔符：再按形状区分"丢分组"与"丢小数点"
+  // 3) 只差分隔符：再看差的是分组符还是小数点（按首个差异位置判断）
   if equivalent(expected, actual, true, Drop, true) {
-    return if looks_grouped(expected) || looks_grouped(actual) {
+    return if separator_diff_is_grouping(expected, actual) {
       @conformance.FailReason::GroupingMismatch
     } else {
       @conformance.FailReason::RoundingMismatch

@@ -11,3 +11,15 @@ pub extend AttributionContext with @debug.Debug::{to_repr}
 
 ///|
 pub extend AttributionContext with Eq::{equal, not_equal}
+
+///|
+pub extend MutationKind with @debug.Debug::{to_repr}
+
+///|
+pub extend MutationKind with Eq::{equal, not_equal}
+
+///|
+pub extend MutationOutcome with @debug.Debug::{to_repr}
+
+///|
+pub extend MutationOutcome with Eq::{equal, not_equal}

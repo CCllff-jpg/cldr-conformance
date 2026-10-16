@@ -99,6 +99,33 @@ async fn main {
     )
   }
 
+  // ---- 归因对照实验（不需要适配器参与）----
+  if has_flag(args, "--attribution-matrix") {
+    let corpus : Array[String] = []
+    for case in decimal.cases {
+      corpus.push(case.expected)
+    }
+    for case in modern.cases {
+      corpus.push(case.expected)
+    }
+    for case in formatted {
+      corpus.push(case.expected)
+    }
+    for case in message_cases {
+      match case.exp {
+        Some(value) => corpus.push(value)
+        None => ()
+      }
+    }
+    println("# 失败归因对照实验（错误注入）\n")
+    println("语料：\{corpus.length()} 条真实 CLDR 期望值。")
+    println(
+      "方法：每种注入只破坏一个维度，\"正确答案\"由构造决定，看归因能否还原。\n",
+    )
+    println(@engine.render_mutation_matrix(@engine.mutation_matrix(corpus)))
+    return
+  }
+
   // ---- 执行（M2 引擎）----
   if selected.length() == 0 {
     if !machine_readable {
@@ -198,6 +225,16 @@ fn flag_value(args : Array[String], flag : String) -> String? {
     index += 1
   }
   None
+}
+
+///|
+fn has_flag(args : Array[String], flag : String) -> Bool {
+  for arg in args {
+    if arg == flag {
+      return true
+    }
+  }
+  false
 }
 
 ///|

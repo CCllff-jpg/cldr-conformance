@@ -10,6 +10,12 @@ import {
 // Values
 pub fn attribute(AttributionContext, String, String) -> @cldr-conformance.FailReason
 
+pub fn mutate(MutationKind, String) -> String?
+
+pub fn mutation_matrix(Array[String]) -> Array[MutationOutcome]
+
+pub fn render_mutation_matrix(Array[MutationOutcome]) -> String
+
 pub fn run_datetime(@adapter.AdapterRegistry, Array[String], String, Array[@cldr-conformance.DatetimeCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
 
 pub fn run_message(@adapter.AdapterRegistry, Array[String], Array[@cldr-conformance.MessageCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
@@ -38,6 +44,38 @@ pub fn EngineConfig::default() -> Self
 pub fn EngineConfig::equal(Self, Self) -> Bool
 pub fn EngineConfig::not_equal(Self, Self) -> Bool
 pub fn EngineConfig::to_repr(Self) -> @debug.Repr
+
+pub(all) enum MutationKind {
+  DropGrouping
+  DropDecimalPoint
+  SwapGroupingGlyph
+  SwapDigitSystem
+  DropBidiMarks
+  PluralizeWord
+  ChangeCompactForm
+  ReturnPattern
+} derive(Eq, @debug.Debug)
+pub fn MutationKind::all() -> Array[Self]
+pub fn MutationKind::context(Self) -> AttributionContext
+pub fn MutationKind::equal(Self, Self) -> Bool
+pub fn MutationKind::intended_reason(Self) -> @cldr-conformance.FailReason
+pub fn MutationKind::label(Self) -> String
+pub fn MutationKind::not_equal(Self, Self) -> Bool
+pub fn MutationKind::to_repr(Self) -> @debug.Repr
+
+pub(all) struct MutationOutcome {
+  kind : MutationKind
+  intended : @cldr-conformance.FailReason
+  applied : Int
+  matched : Int
+  attributed : Array[@cldr-conformance.ReasonCount]
+  sample : String?
+} derive(Eq, @debug.Debug)
+pub fn MutationOutcome::accuracy(Self) -> Double
+pub fn MutationOutcome::accuracy_text(Self) -> String
+pub fn MutationOutcome::equal(Self, Self) -> Bool
+pub fn MutationOutcome::not_equal(Self, Self) -> Bool
+pub fn MutationOutcome::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
