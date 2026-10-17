@@ -15,8 +15,12 @@ pub fn EngineConfig::default() -> EngineConfig {
 ///|
 /// 一条用例 × 一个适配器的执行骨架。
 ///
-/// 先判定可用性（未选入 → `NotInstalled`、未声明能力 → `Unsupported`，两者都不算失败），
-/// 再执行并**隔离异常**：单条用例抛异常只记为 `Errored`，不中断整轮。
+/// 先判定可用性（未选入 → `NotInstalled`、缺少任一所需能力 → `Unsupported`，
+/// 两者都不算失败），再执行并**隔离异常**：单条用例抛异常只记为 `Errored`，不中断整轮。
+///
+/// `required` 是这条用例**所需的能力集合**：例如科学计数法用例同时需要
+/// `Decimal` + `DecimalScientific`。能力模型按"库可能只做其中一部分"切分，
+/// 于是"没有这个能力"不会被算成"做错"（依据见 `可比性映射.md`）。
 ///
 /// 关于超时：这里**不做硬超时**。适配器方法是同步调用，单进程内无法安全打断
 /// （`@async.with_timeout` 需要可让出的 async 体，同步阻塞时定时器无法触发）。
@@ -28,11 +32,21 @@ fn dispatch(
   location : String,
   registry : @adapter.AdapterRegistry,
   selected_ids : Array[String],
-  capability : @conformance.AdapterCapability,
+  required : Array[@conformance.AdapterCapability],
   config : EngineConfig,
   evaluate_case : () -> @conformance.CaseOutcome raise,
 ) -> @conformance.CaseResult raise @adapter.AdapterRegistryError {
-  match registry.unavailable_outcome(adapter_id, selected_ids, capability) {
+  let mut unavailable : @conformance.CaseOutcome? = None
+  for capability in required {
+    match registry.unavailable_outcome(adapter_id, selected_ids, capability) {
+      Some(outcome) => {
+        unavailable = Some(outcome)
+        break
+      }
+      None => ()
+    }
+  }
+  match unavailable {
     Some(outcome) =>
       { suite, adapter_id, source, location, outcome, elapsed_ms: 0, }
     None => {
@@ -159,6 +173,16 @@ pub fn run_number(
   let results : Array[@conformance.CaseResult] = []
   for case in cases {
     for adapter_id in selected_ids {
+      // 这条用例需要哪些能力：普通数字 + （科学计数法 / 紧凑格式）
+      let required : Array[@conformance.AdapterCapability] = [
+        @conformance.AdapterCapability::Decimal,
+      ]
+      if case.style == @conformance.NumberStyle::ScientificStyle {
+        required.push(@conformance.AdapterCapability::DecimalScientific)
+      }
+      if case.length != @conformance.NumberLength::Standard {
+        required.push(@conformance.AdapterCapability::DecimalCompact)
+      }
       results.push(
         dispatch(
           @conformance.Suite::Decimal,
@@ -167,7 +191,7 @@ pub fn run_number(
           "L\{case.line}",
           registry,
           selected_ids,
-          @conformance.AdapterCapability::Decimal,
+          required,
           config,
           () => {
             match registry.number_adapter(adapter_id) {
@@ -220,7 +244,7 @@ pub fn run_skeleton(
           "L\{case.line}",
           registry,
           selected_ids,
-          @conformance.AdapterCapability::DatetimeSkeleton,
+          [@conformance.AdapterCapability::DatetimeSkeleton],
           config,
           () => {
             match registry.datetime_adapter(adapter_id) {
@@ -269,7 +293,7 @@ pub fn run_datetime(
           "#\{case.index}",
           registry,
           selected_ids,
-          @conformance.AdapterCapability::DatetimeFormat,
+          [@conformance.AdapterCapability::DatetimeFormat],
           config,
           () => {
             match registry.datetime_adapter(adapter_id) {
@@ -311,7 +335,7 @@ pub fn run_message(
           "#\{case.index}",
           registry,
           selected_ids,
-          @conformance.AdapterCapability::MessageFormat2,
+          [@conformance.AdapterCapability::MessageFormat2],
           config,
           () => {
             match registry.message_format_2_adapter(adapter_id) {

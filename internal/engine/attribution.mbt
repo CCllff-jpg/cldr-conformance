@@ -102,8 +102,46 @@ fn is_separator(unit : Int) -> Bool {
 }
 
 ///|
-fn is_space(unit : Int) -> Bool {
-  unit == 0x0020 || unit == 0x00A0 || unit == 0x202F || unit == 0x2009
+/// 是否像"精度/舍入"差异：数字值层面接近，只是末位精度或进位不同。
+///
+/// 判据（都不做浮点或大整数运算，避免溢出）：
+/// 1. 一方是另一方的前缀（`1.23` ↔ `1.2`）；
+/// 2. 或：去掉末位后前缀一致，且末位只差 1（舍入进位：
+///    `0.831765` → `0.832` 的第四位由 `1` 进成 `2`）。
+///
+/// 只差得"很小"才算精度问题——`1,234` ↔ `9,999` 不会被误判。
+fn looks_like_precision(expected : String, actual : String) -> Bool {
+  let left = digit_skeleton(expected)
+  let right = digit_skeleton(actual)
+  if left == right || left.length() == 0 || right.length() == 0 {
+    return false
+  }
+  if is_prefix_of(left, right) || is_prefix_of(right, left) {
+    return true
+  }
+  let limit = if left.length() < right.length() {
+    left.length()
+  } else {
+    right.length()
+  }
+  if limit < 2 {
+    return false
+  }
+  let mut index = 0
+  while index + 1 < limit {
+    if unit_at(left, index) != unit_at(right, index) {
+      return false
+    }
+    index += 1
+  }
+  match
+    (
+      digit_value(unit_at(left, limit - 1)),
+      digit_value(unit_at(right, limit - 1)),
+    ) {
+    (Some(a), Some(b)) => if a >= b { a - b <= 1 } else { b - a <= 1 }
+    _ => false
+  }
 }
 
 ///|
@@ -338,26 +376,12 @@ fn has_letter_content(text : String) -> Bool {
 }
 
 ///|
-/// 是否"纯数值形态"：每个码元都是数字、分隔符、符号或双向控制符。
+/// 是否"数值形态"：含数字、且**不含字母**。
 ///
-/// 用于"精度/舍入"这类只该在纯数值之间成立的判断：
-/// `{|42|}` 与 `42` 虽然数字骨架相同，但不是同一类东西，不该判成舍入问题。
+/// 允许前后缀（`%`、`+`/`-`、空格、双向控制符）——百分比用例就是 `0.83%` 这种形态；
+/// 若把 `%` 判成"非数值"，本该归为精度差异的用例会掉进 `other`（实测踩过）。
 fn is_numeric_like(text : String) -> Bool {
-  let mut index = 0
-  while index < text.length() {
-    let unit = unit_at(text, index)
-    if digit_value(unit) is None &&
-      !is_separator(unit) &&
-      !is_bidi_control(unit) &&
-      !is_space(unit) &&
-      unit != 0x002B &&
-      unit != 0x002D &&
-      unit != 0x2212 {
-      return false
-    }
-    index += 1
-  }
-  true
+  digit_skeleton(text) != "" && !has_letter_content(text)
 }
 
 ///|
@@ -508,14 +532,14 @@ pub fn attribute_all(
     !reasons.contains(@conformance.FailReason::CompactFormMismatch) {
     reasons.push(@conformance.FailReason::CompactFormMismatch)
   }
-  // 纯数值且数字骨架不同但互为前缀 → 精度 / 舍入
+  // 数值层面接近（精度不同，或末位因舍入进位而不同）→ 精度 / 舍入
   //
   // 要求骨架**确实不同**：`1,234` ↔ `1234` 的骨架相同，
   // 差异根本不在数字上，不该再加一条"舍入"。
   if is_numeric_like(expected) &&
     is_numeric_like(actual) &&
     expected_digits != actual_digits &&
-    prefix_related &&
+    (prefix_related || looks_like_precision(expected, actual)) &&
     !reasons.contains(@conformance.FailReason::RoundingMismatch) {
     reasons.push(@conformance.FailReason::RoundingMismatch)
   }

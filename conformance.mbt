@@ -54,10 +54,19 @@ pub(all) enum CaseOutcome {
 } derive(Debug, Eq)
 
 ///|
-/// 适配器可声明的能力。日期骨架查询和日期格式化分别声明，
-/// 以便只支持其中一项的实现可以如实返回 `Unsupported`。
+/// 适配器可声明的能力。
+///
+/// 粒度按"**一个库可能只做其中一部分**"来切：
+/// - 日期骨架查询与日期格式化分开声明；
+/// - 数字套件内部再分 `Decimal`（普通/百分比）、`DecimalScientific`、`DecimalCompact`。
+///
+/// 这样"没有这个能力"会记为 `unsupported`（不进一致率分母），
+/// 而不是被算成"做错了"——见 `可比性映射.md` 的实测依据
+/// （例如 `zlhahaha/moonlocale` 没有 scientific 与 compact 数字 API）。
 pub(all) enum AdapterCapability {
   Decimal
+  DecimalScientific
+  DecimalCompact
   DatetimeSkeleton
   DatetimeFormat
   MessageFormat2
@@ -66,7 +75,14 @@ pub(all) enum AdapterCapability {
 ///|
 /// 所有可声明的能力，顺序稳定。
 pub fn AdapterCapability::all() -> Array[AdapterCapability] {
-  [Decimal, DatetimeSkeleton, DatetimeFormat, MessageFormat2]
+  [
+    Decimal,
+    DecimalScientific,
+    DecimalCompact,
+    DatetimeSkeleton,
+    DatetimeFormat,
+    MessageFormat2,
+  ]
 }
 
 ///|
@@ -74,6 +90,8 @@ pub fn AdapterCapability::all() -> Array[AdapterCapability] {
 pub fn AdapterCapability::label(self : AdapterCapability) -> String {
   match self {
     Decimal => "decimal"
+    DecimalScientific => "decimal-scientific"
+    DecimalCompact => "decimal-compact"
     DatetimeSkeleton => "datetime-skeleton"
     DatetimeFormat => "datetime-format"
     MessageFormat2 => "message-format-2"

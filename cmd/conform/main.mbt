@@ -22,6 +22,20 @@ async fn main {
     datetime=Some(reference_null as &@conformance.DatetimeAdapter),
     message_format_2=Some(reference_null as &@conformance.MessageFormat2Adapter),
   )
+  // 第一个**真实**被测实现：只声明它实际具备的能力。
+  // `zlhahaha/moonlocale` 没有 scientific 与 compact 数字 API（实测见 可比性映射.md），
+  // 因此只声明 `Decimal`；那两类用例会被记为 unsupported，而不是算成做错。
+  let moonlocale = @moonlocale.MoonlocaleAdapter::new()
+  registry.register(
+    @adapter.AdapterInfo::new(
+      id="moonlocale",
+      name="moonlocale 0.1.0",
+      capabilities=@conformance.AdapterCapabilities::new([
+        @conformance.AdapterCapability::Decimal,
+      ]),
+    ),
+    number=Some(moonlocale as &@conformance.NumberAdapter),
+  )
   let selected = select_adapters(registry, args)
   let selected_ids = selected.map(info => info.id)
 

@@ -25,6 +25,8 @@ pub fn AdapterCapabilities::to_repr(Self) -> @debug.Repr
 
 pub(all) enum AdapterCapability {
   Decimal
+  DecimalScientific
+  DecimalCompact
   DatetimeSkeleton
   DatetimeFormat
   MessageFormat2

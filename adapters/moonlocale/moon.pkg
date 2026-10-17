@@ -1,0 +1,8 @@
+// 被测实现之一：zlhahaha/moonlocale@0.1.0
+// 只做数字格式化（十进制 / 百分比）——能力范围由实测 API 决定，见 可比性映射.md。
+
+import {
+  "CCllff-jpg/cldr-conformance" @conformance,
+  "moonbitlang/core/debug",
+  "zlhahaha/moonlocale" @upstream,
+}

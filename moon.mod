@@ -30,4 +30,5 @@ description = "CLDR conformance benchmark and differential tester for MoonBit i1
 import {
   "moonbitlang/async@0.22.4",
   "gmlewis/sha256@0.18.0",
+  "zlhahaha/moonlocale@0.1.0",
 }
