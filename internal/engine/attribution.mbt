@@ -12,7 +12,7 @@ pub(all) struct AttributionContext {
 ///|
 pub fn AttributionContext::new(
   suite : @conformance.Suite,
-  compact? : Bool = false,
+  compact~ : Bool = false,
 ) -> AttributionContext {
   { suite, compact, }
 }
@@ -28,7 +28,7 @@ priv enum SeparatorMode {
 
 ///|
 /// Unicode 十进制数字块的起始码位（覆盖 CLDR 数据里会出现的数字系统）。
-fn digit_zeroes() -> Array[Int] {
+fn digit_zeroes() -> Array[Int32] {
   [
     0x0030, // ASCII
      0x0660, // 阿拉伯-印度数字
@@ -54,7 +54,7 @@ fn digit_zeroes() -> Array[Int] {
 
 ///|
 /// 码元 → 数字值（0–9）；不是数字则返回 `None`。
-fn digit_value(unit : Int) -> Int? {
+fn digit_value(unit : Int32) -> Int32? {
   for zero in digit_zeroes() {
     if unit >= zero && unit <= zero + 9 {
       return Some(unit - zero)
@@ -64,18 +64,18 @@ fn digit_value(unit : Int) -> Int? {
 }
 
 ///|
-fn is_ascii_digit(unit : Int) -> Bool {
+fn is_ascii_digit(unit : Int32) -> Bool {
   unit >= 0x0030 && unit <= 0x0039
 }
 
 ///|
-fn unit_at(text : String, index : Int) -> Int {
+fn unit_at(text : String, index : Int32) -> Int32 {
   text[index].to_int()
 }
 
 ///|
 /// 双向控制符：排版隔离用，不属于"格式化结果"本身。
-fn is_bidi_control(unit : Int) -> Bool {
+fn is_bidi_control(unit : Int32) -> Bool {
   (unit >= 0x200E && unit <= 0x200F) ||
   (unit >= 0x202A && unit <= 0x202E) ||
   (unit >= 0x2066 && unit <= 0x2069) ||
@@ -84,7 +84,7 @@ fn is_bidi_control(unit : Int) -> Bool {
 
 ///|
 /// 分组与小数分隔符（含阿拉伯语 `٬` / `٫`、法语窄不换行空格、瑞士撇号）。
-fn is_separator(unit : Int) -> Bool {
+fn is_separator(unit : Int32) -> Bool {
   match unit {
     0x002C
     | 0x002E
@@ -148,10 +148,10 @@ fn looks_like_precision(expected : String, actual : String) -> Bool {
 /// 跳过"可忽略"的码元：按开关忽略双向控制符与分隔符。
 fn skip_ignorable(
   text : String,
-  start : Int,
+  start : Int32,
   drop_bidi : Bool,
   drop_separators : Bool,
-) -> Int {
+) -> Int32 {
   let mut index = start
   while index < text.length() {
     let unit = unit_at(text, index)
@@ -259,8 +259,8 @@ fn separator_glyphs(text : String) -> String {
 
 ///|
 /// 提取数字的**字形**序列（码元本身，忽略分隔符）。
-fn digit_glyphs(text : String) -> Array[Int] {
-  let glyphs : Array[Int] = []
+fn digit_glyphs(text : String) -> Array[Int32] {
+  let glyphs : Array[Int32] = []
   let mut index = 0
   while index < text.length() {
     let unit = unit_at(text, index)
@@ -300,7 +300,7 @@ fn digit_glyphs_differ(expected : String, actual : String) -> Bool {
 /// 其后还有内容（另一个分隔符或更多数字）→ 只能是分组符；
 /// 其后直到串尾是 3 位数字 → 按分组符处理（CLDR 里整数用分组）；
 /// 其后直到串尾是 1–2 位数字 → 小数点。
-fn is_grouping_role(text : String, index : Int) -> Bool {
+fn is_grouping_role(text : String, index : Int32) -> Bool {
   let mut digits = 0
   let mut cursor = index + 1
   while cursor < text.length() && digit_value(unit_at(text, cursor)) is Some(_) {
@@ -349,7 +349,7 @@ fn separator_diff_is_grouping(expected : String, actual : String) -> Bool {
 /// 典型坑：阿拉伯语百分号 `٪`(U+066A) 落在阿拉伯字母区块内，
 /// 若按区块范围一概当作字母，`٠٫٨٣١٧٦٥٪؜` 这种纯数值串会被判成"含文字"，
 /// 从而丢掉本该命中的精度归因（实测踩过）。
-fn is_script_punctuation(unit : Int) -> Bool {
+fn is_script_punctuation(unit : Int32) -> Bool {
   match unit {
     0x060C
     | 0x061B
@@ -370,7 +370,7 @@ fn is_script_punctuation(unit : Int) -> Bool {
 ///
 /// 刻意**排除标点与符号**：`{|42|}` 的括号、阿拉伯语百分号 `٪` 都不属于"文字内容"，
 /// 否则会把"语法/数值差异"误判成复数词形差异（踩过这个坑）。
-fn is_letterish(unit : Int) -> Bool {
+fn is_letterish(unit : Int32) -> Bool {
   if is_ascii_letter(unit) {
     return true
   }

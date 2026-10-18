@@ -19,7 +19,7 @@ pub(all) struct SourceFile {
   path : String
   url : String
   sha256 : String
-  bytes : Int
+  bytes : Int32
   tier : Tier
 } derive(Debug, Eq, ToJson, FromJson)
 
@@ -37,9 +37,9 @@ pub(all) struct Manifest {
 pub(all) suberror SourceError {
   ManifestNotFound(path~ : String)
   /// 校验发现不一致的条目数量（> 0 即失败，用于 CI 退出码）。
-  VerificationFailed(mismatches~ : Int)
+  VerificationFailed(mismatches~ : Int32)
   /// 同步失败的条目数量（> 0 即失败，用于 CI 退出码）。
-  SyncFailed(failures~ : Int)
+  SyncFailed(failures~ : Int32)
 } derive(Debug)
 
 ///|

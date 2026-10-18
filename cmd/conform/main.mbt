@@ -36,6 +36,18 @@ async fn main {
     ),
     number=Some(moonlocale as &@conformance.NumberAdapter),
   )
+  // 生态里唯一的原生 MF2 实现；只声明它实际具备的能力。
+  let lampclaw = @lampclaw.LampclawMf2Adapter::new()
+  registry.register(
+    @adapter.AdapterInfo::new(
+      id="lampclaw-i18n",
+      name="lampclaw/i18n 0.9.3 (MF2)",
+      capabilities=@conformance.AdapterCapabilities::new([
+        @conformance.AdapterCapability::MessageFormat2,
+      ]),
+    ),
+    message_format_2=Some(lampclaw as &@conformance.MessageFormat2Adapter),
+  )
   let selected = select_adapters(registry, args)
   let selected_ids = selected.map(info => info.id)
 

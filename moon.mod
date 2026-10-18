@@ -31,4 +31,5 @@ import {
   "moonbitlang/async@0.22.4",
   "gmlewis/sha256@0.18.0",
   "zlhahaha/moonlocale@0.1.0",
+  "lampclaw/i18n@0.9.3",
 }

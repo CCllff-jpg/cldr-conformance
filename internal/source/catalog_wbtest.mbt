@@ -51,7 +51,7 @@ test "快速档全部是 Fast，全量档包含两者" {
 
 ///|
 test "覆盖三个套件，每类都至少有一个文件" {
-  let suites : Map[String, Int] = Map([])
+  let suites : Map[String, Int32] = Map([])
   for item in catalog_all() {
     let n = match suites.get(item.suite) {
       Some(count) => count

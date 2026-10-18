@@ -3,7 +3,7 @@
 pub(all) enum VerifyOutcome {
   Match
   Mismatch(expected~ : String, actual~ : String)
-  SizeMismatch(expected~ : Int, actual~ : Int)
+  SizeMismatch(expected~ : Int32, actual~ : Int32)
   Missing
 } derive(Debug, Eq)
 
@@ -62,7 +62,7 @@ pub async fn verify_manifest(manifest : Manifest) -> Array[VerifyEntry] {
 
 ///|
 /// 不一致的条目数量（CI 用它决定退出码）。
-pub fn count_failures(entries : Array[VerifyEntry]) -> Int {
+pub fn count_failures(entries : Array[VerifyEntry]) -> Int32 {
   entries.filter(entry => !entry.outcome.is_ok()).length()
 }
 

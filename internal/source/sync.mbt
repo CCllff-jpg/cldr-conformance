@@ -3,8 +3,8 @@
 ///
 /// `backoff_ms = 0` 时退化为立即重试——测试用它避免真实等待。
 pub(all) struct RetryPolicy {
-  max_attempts : Int
-  backoff_ms : Int
+  max_attempts : Int32
+  backoff_ms : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -24,7 +24,7 @@ pub fn RetryPolicy::retry_method(self : RetryPolicy) -> @async.RetryMethod {
 
 ///|
 /// `@async.retry` 的 `max_retry` 是「首次尝试之外的重试次数」，所以减一。
-pub fn RetryPolicy::max_retry(self : RetryPolicy) -> Int {
+pub fn RetryPolicy::max_retry(self : RetryPolicy) -> Int32 {
   if self.max_attempts <= 1 {
     0
   } else {
@@ -184,7 +184,7 @@ pub fn manifest_of(
 
 ///|
 /// 失败的条目数（CI 用它决定退出码）。
-pub fn count_failed(results : Array[SyncEntry]) -> Int {
+pub fn count_failed(results : Array[SyncEntry]) -> Int32 {
   results.filter(result => result.outcome.is_failure()).length()
 }
 

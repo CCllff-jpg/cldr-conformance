@@ -53,14 +53,14 @@ pub fn parse_tsv(text : StringView) -> TsvTable {
 
 ///|
 /// 数据行数（不含表头）。
-pub fn TsvTable::row_count(self : TsvTable) -> Int {
+pub fn TsvTable::row_count(self : TsvTable) -> Int32 {
   self.rows.length()
 }
 
 ///|
 /// 按表头名取列下标；表头里没有该列时返回 `None`。
-pub fn TsvTable::column_index(self : TsvTable, column : String) -> Int? {
-  let mut found : Int? = None
+pub fn TsvTable::column_index(self : TsvTable, column : String) -> Int32? {
+  let mut found : Int32? = None
   for i, name in self.header {
     if found is None && name == column {
       found = Some(i)
@@ -71,7 +71,7 @@ pub fn TsvTable::column_index(self : TsvTable, column : String) -> Int? {
 
 ///|
 /// 按「行号 + 列名」取值；列名不存在或该行字段不足时返回 `None`。
-pub fn TsvTable::get(self : TsvTable, row : Int, column : String) -> String? {
+pub fn TsvTable::get(self : TsvTable, row : Int32, column : String) -> String? {
   match self.rows.get(row) {
     None => None
     Some(fields) =>
@@ -107,7 +107,7 @@ pub fn TsvTable::column_values(
 ///
 /// 用途是**数据自检**：上游若改了格式（多/少一列），这里会立刻暴露，
 /// 而不是让解析结果静默丢字段（见 开发方案.md §5 测试策略）。
-pub fn TsvTable::ragged_rows(self : TsvTable) -> Array[Int] {
+pub fn TsvTable::ragged_rows(self : TsvTable) -> Array[Int32] {
   let bad = []
   let expected = self.header.length()
   for i, fields in self.rows {
@@ -136,7 +136,7 @@ pub fn render_tsv(table : TsvTable) -> String {
 /// 所有数据字段中落在 RTL / 格式控制区的字符数（U+2000–U+206F 与 U+061C）。
 ///
 /// 用途：数据质量自检与报告展示——这些字符正是手写实现最容易丢掉的东西。
-pub fn TsvTable::control_char_count(self : TsvTable) -> Int {
+pub fn TsvTable::control_char_count(self : TsvTable) -> Int32 {
   let mut count = 0
   for fields in self.rows {
     for field in fields {

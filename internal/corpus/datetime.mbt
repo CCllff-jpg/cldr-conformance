@@ -5,22 +5,22 @@
 /// 不做静默跳过——那意味着数据基线变了（见 开发方案.md §5 数据自检）。
 pub(all) suberror DatetimeParseError {
   MissingColumn(column~ : String)
-  RaggedRow(line~ : Int)
+  RaggedRow(line~ : Int32)
   /// `datetime.json` 顶层不是数组。
   NotAnArray
   /// 数组元素不是对象。
-  NotAnObject(index~ : Int)
-  MissingField(index~ : Int, field~ : String)
+  NotAnObject(index~ : Int32)
+  MissingField(index~ : Int32, field~ : String)
   /// 出现了未建模的字段：上游加了新能力，必须让人看见，否则会「漏测」而不自知。
-  UnknownField(index~ : Int, field~ : String)
-  WrongType(index~ : Int, field~ : String)
+  UnknownField(index~ : Int32, field~ : String)
+  WrongType(index~ : Int32, field~ : String)
 } derive(Debug)
 
 ///|
 fn require_dt_column(
   table : TsvTable,
   column : String,
-) -> Int raise DatetimeParseError {
+) -> Int32 raise DatetimeParseError {
   match table.column_index(column) {
     Some(index) => index
     None => raise DatetimeParseError::MissingColumn(column~)
@@ -78,7 +78,7 @@ fn is_known_datetime_field(name : String) -> Bool {
 ///|
 fn json_string(
   fields : Map[String, Json],
-  index : Int,
+  index : Int32,
   field : String,
 ) -> String raise DatetimeParseError {
   match fields.get(field) {
@@ -91,7 +91,7 @@ fn json_string(
 ///|
 fn json_optional_string(
   fields : Map[String, Json],
-  index : Int,
+  index : Int32,
   field : String,
 ) -> String? raise DatetimeParseError {
   match fields.get(field) {

@@ -13,7 +13,7 @@ pub fn AdapterInfo::new(
   id~ : String,
   name~ : String,
   capabilities~ : @conformance.AdapterCapabilities,
-  installed? : Bool = true,
+  installed~ : Bool = true,
 ) -> AdapterInfo {
   { id, name, installed, capabilities, }
 }
@@ -52,9 +52,9 @@ pub fn AdapterRegistry::new() -> AdapterRegistry {
 pub fn AdapterRegistry::register(
   self : AdapterRegistry,
   info : AdapterInfo,
-  number? : &@conformance.NumberAdapter? = None,
-  datetime? : &@conformance.DatetimeAdapter? = None,
-  message_format_2? : &@conformance.MessageFormat2Adapter? = None,
+  number~ : &@conformance.NumberAdapter? = None,
+  datetime~ : &@conformance.DatetimeAdapter? = None,
+  message_format_2~ : &@conformance.MessageFormat2Adapter? = None,
 ) -> Unit raise AdapterRegistryError {
   if info.id == "" {
     raise AdapterRegistryError::EmptyId

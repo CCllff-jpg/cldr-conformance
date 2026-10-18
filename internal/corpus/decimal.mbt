@@ -6,16 +6,16 @@
 /// 必须让人看见（见 开发方案.md §5 数据自检）。
 pub(all) suberror DecimalParseError {
   MissingColumn(column~ : String)
-  RaggedRow(line~ : Int)
-  UnknownStyle(line~ : Int, value~ : String)
-  UnknownLength(line~ : Int, value~ : String)
+  RaggedRow(line~ : Int32)
+  UnknownStyle(line~ : Int32, value~ : String)
+  UnknownLength(line~ : Int32, value~ : String)
 } derive(Debug)
 
 ///|
 fn require_column(
   table : TsvTable,
   column : String,
-) -> Int raise DecimalParseError {
+) -> Int32 raise DecimalParseError {
   match table.column_index(column) {
     Some(index) => index
     None => raise DecimalParseError::MissingColumn(column~)
@@ -27,7 +27,7 @@ fn require_column(
 /// 但保留映射，以便上游将来加入时不至于直接失败。
 fn style_of(
   value : String,
-  line~ : Int,
+  line~ : Int32,
 ) -> @conformance.NumberStyle raise DecimalParseError {
   match value {
     "decimal" => @conformance.NumberStyle::DecimalStyle
@@ -42,7 +42,7 @@ fn style_of(
 /// `format_length` 列 → `NumberLength`（空值表示未指定紧凑格式）。
 fn length_of(
   value : String,
-  line~ : Int,
+  line~ : Int32,
 ) -> @conformance.NumberLength raise DecimalParseError {
   match value {
     "" => @conformance.NumberLength::Standard

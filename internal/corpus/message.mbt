@@ -6,10 +6,10 @@
 pub(all) suberror MessageParseError {
   /// 结构问题（顶层不是对象、tests 不是数组、元素不是对象等）。
   Malformed(file~ : String, detail~ : String)
-  MissingField(file~ : String, index~ : Int, name~ : String)
+  MissingField(file~ : String, index~ : Int32, name~ : String)
   /// 出现未建模的字段：上游加了新能力，必须让人看见，否则会静默漏测。
-  UnknownField(file~ : String, index~ : Int, name~ : String)
-  WrongType(file~ : String, index~ : Int, name~ : String)
+  UnknownField(file~ : String, index~ : Int32, name~ : String)
+  WrongType(file~ : String, index~ : Int32, name~ : String)
 } derive(Debug)
 
 ///|
@@ -54,7 +54,7 @@ fn known_test_field(name : String) -> Bool {
 fn msg_required_string(
   fields : Map[String, Json],
   file : String,
-  index : Int,
+  index : Int32,
   name : String,
 ) -> String raise MessageParseError {
   match fields.get(name) {
@@ -68,7 +68,7 @@ fn msg_required_string(
 fn msg_optional_string(
   fields : Map[String, Json],
   file : String,
-  index : Int,
+  index : Int32,
   name : String,
 ) -> String? raise MessageParseError {
   match fields.get(name) {
@@ -82,7 +82,7 @@ fn msg_optional_string(
 fn msg_string_array(
   fields : Map[String, Json],
   file : String,
-  index : Int,
+  index : Int32,
   name : String,
 ) -> Array[String] raise MessageParseError {
   let values : Array[String] = []
@@ -108,7 +108,7 @@ fn msg_string_array(
 fn msg_error_types(
   value : Json,
   file : String,
-  index : Int,
+  index : Int32,
   name : String,
 ) -> Array[String] raise MessageParseError {
   let items = match value {

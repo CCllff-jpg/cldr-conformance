@@ -53,7 +53,7 @@ pub fn canonical_locale_tag(tag : String) -> String {
 }
 
 ///|
-fn unit_at(text : String, index : Int) -> Int {
+fn unit_at(text : String, index : Int32) -> Int32 {
   text[index].to_int()
 }
 
@@ -78,7 +78,7 @@ pub fn parse_decimal(text : String) -> @upstream.Decimal? {
   } else if first == 0x002B {
     index = 1
   }
-  let mut coefficient : Int = 0
+  let mut coefficient : Int32 = 0
   let mut digits = 0
   let mut scale = 0
   let mut seen_point = false

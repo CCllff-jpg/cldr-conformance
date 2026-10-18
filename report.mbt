@@ -36,12 +36,12 @@ pub fn FailReason::all() -> Array[FailReason] {
 /// 报告要给的是"一眼看出差在哪"，而不是让人自己 diff 两串长文本。
 pub(all) struct CharDiff {
   /// 首个不同码元的下标（0 起）；两串完全相同时为 -1。
-  index : Int
+  index : Int32
   /// 差异位置附近的期望片段（截断处用 `…` 标记）。
   expected_snippet : String
   actual_snippet : String
-  expected_length : Int
-  actual_length : Int
+  expected_length : Int32
+  actual_length : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -84,7 +84,7 @@ pub fn char_diff(expected : String, actual : String) -> CharDiff {
 }
 
 ///|
-fn snippet(text : String, start : Int, end : Int) -> String {
+fn snippet(text : String, start : Int32, end : Int32) -> String {
   let prefix = if start > 0 { "…" } else { "" }
   let suffix = if end < text.length() { "…" } else { "" }
   prefix + text.clamped_view(start~, end~).to_owned() + suffix
@@ -101,7 +101,7 @@ pub(all) struct SuiteSummary {
 /// 某个失败原因的计数。
 pub(all) struct ReasonCount {
   reason : FailReason
-  count : Int
+  count : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -153,7 +153,7 @@ pub(all) struct Report {
 ///
 /// 4714 条用例 × N 个适配器全量塞进 JSON 会有数 MB，而人看前几条就能定位问题；
 /// 计数与归因分布始终是完整的，不受这个上限影响。
-pub fn failure_sample_limit() -> Int {
+pub fn failure_sample_limit() -> Int32 {
   20
 }
 
@@ -197,7 +197,7 @@ fn suite_summaries(results : Array[CaseResult]) -> Array[SuiteSummary] {
 pub fn AdapterReport::from_results(
   adapter_id : String,
   results : Array[CaseResult],
-  limit? : Int = -1,
+  limit~ : Int32 = -1,
 ) -> AdapterReport {
   let cap = if limit < 0 { failure_sample_limit() } else { limit }
   let mine = results.filter(result => result.adapter_id == adapter_id)
@@ -245,7 +245,7 @@ pub fn Report::from_results(
   baseline : String,
   adapter_ids : Array[String],
   results : Array[CaseResult],
-  limit? : Int = -1,
+  limit~ : Int32 = -1,
 ) -> Report {
   let adapters : Array[AdapterReport] = []
   for adapter_id in adapter_ids {

@@ -84,7 +84,7 @@ pub fn MutationKind::context(self : MutationKind) -> AttributionContext {
 }
 
 ///|
-fn is_ascii_letter(unit : Int) -> Bool {
+fn is_ascii_letter(unit : Int32) -> Bool {
   (unit >= 0x0041 && unit <= 0x005A) || (unit >= 0x0061 && unit <= 0x007A)
 }
 
@@ -96,7 +96,7 @@ fn arabic_digit_strings() -> Array[String] {
 }
 
 ///|
-fn contains_index(indexes : Array[Int], target : Int) -> Bool {
+fn contains_index(indexes : Array[Int32], target : Int32) -> Bool {
   for index in indexes {
     if index == target {
       return true
@@ -110,8 +110,8 @@ fn contains_index(indexes : Array[Int], target : Int) -> Bool {
 fn copy_range(
   out : StringBuilder,
   text : String,
-  start : Int,
-  end : Int,
+  start : Int32,
+  end : Int32,
 ) -> Unit {
   // 注意：`StringBuilder::write_substring` 的第 3、4 个参数是 **(start, length)**
   // 而不是 (start, end)——见 core `builtin/string_methods.mbt`。
@@ -123,8 +123,8 @@ fn copy_range(
 
 ///|
 /// 找出所有**分组分隔符**的下标：其后正好跟 3 个数字，且之后是分隔符或串尾。
-fn grouping_indexes(text : String) -> Array[Int] {
-  let indexes : Array[Int] = []
+fn grouping_indexes(text : String) -> Array[Int32] {
+  let indexes : Array[Int32] = []
   let mut index = 0
   while index < text.length() {
     if is_separator(unit_at(text, index)) {
@@ -147,7 +147,7 @@ fn grouping_indexes(text : String) -> Array[Int] {
 
 ///|
 /// 删除指定下标处的码元。
-fn drop_at(text : String, skip : Array[Int]) -> String {
+fn drop_at(text : String, skip : Array[Int32]) -> String {
   let out = StringBuilder()
   let mut run_start = 0
   let mut index = 0
@@ -198,7 +198,7 @@ fn drop_decimal_point(text : String) -> String? {
   if digits < 1 || digits > 2 || cursor != text.length() {
     return None
   }
-  let skip : Array[Int] = [last]
+  let skip : Array[Int32] = [last]
   Some(drop_at(text, skip))
 }
 
@@ -253,7 +253,7 @@ fn swap_digit_system(text : String) -> String? {
 ///|
 /// 删掉双向控制符。
 fn drop_bidi_marks(text : String) -> String? {
-  let skip : Array[Int] = []
+  let skip : Array[Int32] = []
   let mut index = 0
   while index < text.length() {
     if is_bidi_control(unit_at(text, index)) {
@@ -352,9 +352,9 @@ pub(all) struct MutationOutcome {
   kind : MutationKind
   intended : @conformance.FailReason
   /// 该注入在当前语料上可应用的条数。
-  applied : Int
+  applied : Int32
   /// 归因还原出预定原因的条数。
-  matched : Int
+  matched : Int32
   /// 实际归因分布（含未命中的去向，用于看误判方向）。
   attributed : Array[@conformance.ReasonCount]
   /// 一个具体样例 `期望 → 实际`，用于文档与人工复核。
@@ -465,13 +465,13 @@ fn compound_context(
 pub(all) struct CompoundOutcome {
   first : MutationKind
   second : MutationKind
-  applied : Int
+  applied : Int32
   /// 归因命中"这两处之一"的条数（复合失败的合理判定）。
-  hit_either : Int
+  hit_either : Int32
   /// 落到 `other` 的条数（保守兜底）。
-  hit_other : Int
+  hit_other : Int32
   /// 落到与两者都无关的类别的条数（**真正需要关注的误判**）。
-  hit_unrelated : Int
+  hit_unrelated : Int32
   attributed : Array[@conformance.ReasonCount]
   sample : String?
 } derive(Debug, Eq)

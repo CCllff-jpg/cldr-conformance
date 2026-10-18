@@ -1,7 +1,7 @@
 ///|
 /// 十进制字符串 → 定点 `Decimal`，**全程不经 Double**。
 test "解析十进制字符串为定点 Decimal" {
-  let cases : Array[(String, Int, Int)] = [
+  let cases : Array[(String, Int32, Int32)] = [
     ("1.2", 12, 1),
     ("0.00831765", 831765, 8),
     ("1234565.0", 12345650, 1),

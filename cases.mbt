@@ -10,7 +10,7 @@ pub(all) struct DecimalCase {
   input : String
   expected : String
   /// 源文件行号（1 起，含表头行），用于报告定位。
-  line : Int
+  line : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -25,7 +25,7 @@ pub fn DecimalCorpus::new(cases : Array[DecimalCase]) -> DecimalCorpus {
 }
 
 ///|
-pub fn DecimalCorpus::length(self : DecimalCorpus) -> Int {
+pub fn DecimalCorpus::length(self : DecimalCorpus) -> Int32 {
   self.cases.length()
 }
 
@@ -35,7 +35,7 @@ pub fn DecimalCorpus::length(self : DecimalCorpus) -> Int {
 /// **不能直接用 `Array::sort()`**：MoonBit 的 `Compare for String` 是「先比长度、
 /// 再逐码元」（见 core `builtin/string.mbt`），于是 `"en"` 会排在 `"ar-SA"` 前面。
 /// 报告表格要给人看，所以这里显式给出符合直觉的顺序。
-fn lexicographic_compare(a : String, b : String) -> Int {
+fn lexicographic_compare(a : String, b : String) -> Int32 {
   let limit = if a.length() < b.length() { a.length() } else { b.length() }
   for i in 0..<limit {
     let left = a[i]
@@ -82,7 +82,7 @@ pub(all) struct SkeletonCase {
   skeleton : String
   pattern : String
   /// 源文件行号（1 起，含表头行）。
-  line : Int
+  line : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -106,7 +106,7 @@ pub(all) struct DatetimeCase {
   year_style : String?
   date_time_format_type : String?
   /// 在源文件数组中的下标（0 起），用于报告定位。
-  index : Int
+  index : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -125,7 +125,7 @@ pub fn DatetimeCorpus::new(
 }
 
 ///|
-pub fn DatetimeCorpus::length(self : DatetimeCorpus) -> Int {
+pub fn DatetimeCorpus::length(self : DatetimeCorpus) -> Int32 {
   self.skeletons.length() + self.formatted.length()
 }
 
@@ -170,7 +170,7 @@ pub(all) struct MessageCase {
   file : String
   scenario : String
   /// 在该文件 `tests` 数组中的下标（0 起）。
-  index : Int
+  index : Int32
   description : String?
   /// MF2 消息源码。
   src : String
@@ -202,7 +202,7 @@ pub fn MessageCorpus::new(cases : Array[MessageCase]) -> MessageCorpus {
 }
 
 ///|
-pub fn MessageCorpus::length(self : MessageCorpus) -> Int {
+pub fn MessageCorpus::length(self : MessageCorpus) -> Int32 {
   self.cases.length()
 }
 

@@ -263,18 +263,18 @@ pub(all) struct CaseResult {
   location : String
   outcome : CaseOutcome
   /// 单用例耗时（毫秒）。
-  elapsed_ms : Int
+  elapsed_ms : Int32
 } derive(Debug, Eq)
 
 ///|
 /// 一次运行的计数汇总。
 pub(all) struct RunSummary {
-  total : Int
-  passed : Int
-  failed : Int
-  unsupported : Int
-  not_installed : Int
-  errored : Int
+  total : Int32
+  passed : Int32
+  failed : Int32
+  unsupported : Int32
+  not_installed : Int32
+  errored : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -313,7 +313,7 @@ pub fn RunSummary::from_results(results : Array[CaseResult]) -> RunSummary {
 
 ///|
 /// 真正的一致性失败数 = 答错 + 抛异常。
-pub fn RunSummary::failures(self : RunSummary) -> Int {
+pub fn RunSummary::failures(self : RunSummary) -> Int32 {
   self.failed + self.errored
 }
 
@@ -325,7 +325,7 @@ pub fn RunSummary::is_clean(self : RunSummary) -> Bool {
 
 ///|
 /// 不参与一致性统计的用例数（无能力 + 未选入）。
-pub fn RunSummary::excluded(self : RunSummary) -> Int {
+pub fn RunSummary::excluded(self : RunSummary) -> Int32 {
   self.unsupported + self.not_installed
 }
 

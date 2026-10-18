@@ -6,7 +6,7 @@
 pub(all) struct FetchResult {
   url : String
   path : String
-  bytes : Int
+  bytes : Int32
   sha256 : String
 } derive(Debug, Eq)
 
@@ -14,9 +14,9 @@ pub(all) struct FetchResult {
 /// 抓取过程中的失败。
 pub(all) suberror FetchError {
   /// 服务端返回了非 2xx 状态码。
-  UnexpectedStatus(url~ : String, code~ : Int)
+  UnexpectedStatus(url~ : String, code~ : Int32)
   /// 重试耗尽仍然失败；`reason` 保留最后一次的原始错误，便于排查。
-  ExhaustedRetries(url~ : String, attempts~ : Int, reason~ : String)
+  ExhaustedRetries(url~ : String, attempts~ : Int32, reason~ : String)
 } derive(Debug)
 
 ///|
@@ -36,7 +36,7 @@ pub fn sha256_hex(data : Bytes) -> String {
 pub fn parent_dir(path : String) -> String? {
   let slash = path.rev_find("/")
   let backslash = path.rev_find("\\")
-  let last : Int? = match (slash, backslash) {
+  let last : Int32? = match (slash, backslash) {
     (Some(a), Some(b)) => Some(if a > b { a } else { b })
     (Some(a), None) => Some(a)
     (None, Some(b)) => Some(b)

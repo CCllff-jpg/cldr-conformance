@@ -1,0 +1,8 @@
+// 被测实现之二：lampclaw/i18n@0.9.3 的 MF2 runtime
+// 生态里唯一的原生 MF2 实现（Zhouz-z/moon_l10n 是 ICU，属不同标准）。
+
+import {
+  "CCllff-jpg/cldr-conformance" @conformance,
+  "lampclaw/i18n/runtime" @mf2,
+  "moonbitlang/core/debug",
+}
