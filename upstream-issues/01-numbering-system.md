@@ -1,0 +1,60 @@
+数字格式化未支持 numbering system：数字永远 ASCII，符号却随语言
+
+**版本**：`zlhahaha/moonlocale@0.1.0`
+**严重性**：高（影响所有使用非 latn 数字的区域）
+**发现方式**：用 CLDR 官方测试数据 `common/testData/numberFormat/decimals.tsv`
+（release-49-beta3）对拍。
+
+## 现象
+
+`DecimalFormatter` 输出的**数字字符永远是 ASCII**，但分组符/小数点取自
+`number_symbols(locale)`（按**语言**取）。两者不同源，于是非 latn 区域得到"混合"结果：
+
+| locale | CLDR 期望 | moonlocale 实际 |
+|---|---|---|
+| `ar` | `1,234,565`（latn 数字 + ASCII 符号） | `1٬234٬565`（ASCII 数字 + 阿拉伯符号） |
+| `ar_EG` | `٠` / `١٬٢٣٤٬٥٦٥`（arab 数字） | `0`（ASCII 数字） |
+| `bn` | `০` / `১২,৩৪,৫৬৫`（beng 数字） | `0` / `12,34,565`（ASCII 数字） |
+
+注意第一行：CLDR 对 `ar`（非埃及）的默认是 **latn**，对 `ar_EG` 才是 **arab**；
+而 `number_symbols` 看起来是按语言（`ar`）处理的，所以连 `ar` 的符号也给成了阿拉伯符号。
+
+## 最小复现
+
+```moonbit
+let ar = @moonlocale.Locale::from_string("ar").unwrap()
+let formatter = @moonlocale.DecimalFormatter::new(ar)
+let value = @moonlocale.Decimal::new(1234565, 0)
+println(formatter.format(value))          // "1٬234٬565"
+// CLDR decimals.tsv（ar, decimal, 1234565.0）期望: "1,234,565"
+
+let eg = @moonlocale.Locale::from_string("ar-EG").unwrap()
+println(@moonlocale.DecimalFormatter::new(eg).format(@moonlocale.Decimal::new(0, 0)))
+// "0"；CLDR decimals.tsv（ar_EG, decimal, 0.0）期望: "٠"
+```
+
+## 定位到的位置
+
+`decimal.mbt:196`，`decimal_digit_parts` 里：
+
+```moonbit
+let raw = expanded.to_string()   // 只生成 ASCII 数字，没有做 numbering system 映射
+```
+
+而符号来自 `number_symbols(locale)`（`decimal.mbt` 里 `format_decimal_body` 调用），
+数字与符号的"数字系统"来源不一致。
+
+## 建议
+
+CLDR 的模型是：locale 的 `defaultNumberingSystem` 同时决定**数字字符**与**符号**，
+`-u-nu-latn` / `-u-nu-arab` 等 Unicode 扩展可覆盖。对应两处改动：
+
+1. `decimal_digit_parts` 增加一个"目标数字表"（10 个字符）参数，
+   输出前把 ASCII 数字映射过去；
+2. `number_symbols` 也按 numbering system 选择（latn → `,` / `.`；
+   arab → `٬` / `٫`），而不是只看语言。
+
+## 影响面
+
+在 CLDR 数字套件的可比用例里，`ar` / `ar_EG` / `bn` 三个 locale 共 75 条，
+其中 63 条被归因为数字系统不一致，另有数十条分隔符差异来自同一根因。

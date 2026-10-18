@@ -1,0 +1,48 @@
+RTL 区域的百分比输出缺少双向控制符（U+200E / U+061C）
+
+**版本**：`zlhahaha/moonlocale@0.1.0`
+**严重性**：低（不影响数值正确性，影响 RTL 排版）
+
+## 现象
+
+CLDR 对阿拉伯语等 RTL 区域的百分比格式，期望在数字与 `%` 周围带双向隔离符
+（`U+200E` LRM / `U+061C` ALM），以保证在 RTL 段落里符号位置不跳：
+
+| 输入 | CLDR 期望 | moonlocale 实际 |
+|---|---|---|
+| `ar` percent `0.0` | `0<LRM>%<LRM>` | `0%` |
+| `ar` percent `1.2` | `120<LRM>%<LRM>` | `120%` |
+| `ar_EG` percent `0.00831765` | `٠٫٨٣١٧٦٥٪<ALM>` | `0٫832%` |
+
+（`<LRM>` = `U+200E`，`<ALM>` = `U+061C`。）
+
+## 复现
+
+```moonbit
+let ar = @moonlocale.Locale::from_string("ar").unwrap()
+@moonlocale.DecimalFormatter::new(ar).format_percent(
+  @moonlocale.Decimal::new(0, 0),
+  @moonlocale.PercentSpacing::LocaleDefault,
+)
+// 实际 "0%"；CLDR decimals.tsv（ar, percent, 0.0）期望 "0\u{200E}%\u{200E}"
+```
+
+## 背景
+
+CLDR 的 `numberPatterns` 里，RTL 区域的百分比模式带 `‎`（LRM）标记，
+目的是让 `%` 在 RTL 上下文中仍显示在数字的**左侧**（视觉顺序），
+属于"排版必需"，不是装饰。
+
+## 建议
+
+如果打算支持，可以在 `format_percent` 里按 locale 的书写方向插入隔离符；
+也可以提供一个显式的开关（例如 `with_bidi_isolation(true)`），
+因为有些调用方会在自己的排版层统一处理，重复插入会出问题。
+
+如果暂不支持，建议在 README 的"已知限制"里提一句，
+这样使用者不会误以为输出可直接用于 RTL UI。
+
+## 影响面
+
+CLDR 数字套件里 **6 条**用例被归因为 `bidi-control-missing`；
+另有若干条与其他问题复合出现（选它作为归因时会被更高优先级的原因覆盖）。
