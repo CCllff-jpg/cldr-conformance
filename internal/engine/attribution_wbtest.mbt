@@ -145,23 +145,32 @@ test "规则 7：纯数字且互为前缀 → RoundingMismatch" {
 }
 
 ///|
-test "保守兜底：无法证明只差某一类时一律 Other" {
-  // 完全不同
+/// 数值本身不同 → `value-mismatch`；其余"证明不了"的情形仍归 `other`。
+///
+/// 这条边界很重要：`value-mismatch` 说的是"实现**算错了**"，
+/// `other` 说的是"我们**说不准**"——两者对上游的含义完全不同。
+test "数值错误与保守兜底的分界" {
+  // 百分比计算溢出：期望 123,456,500%，实际 -1,097,551.584%
+  assert_eq(
+    attribute(decimal_context(), "123,456,500%", "-1,097,551.584%"),
+    @conformance.FailReason::ValueMismatch,
+  )
+  // 数值差得多且不成前缀/不进位 → 数值错误
+  assert_eq(
+    attribute(decimal_context(), "1,234", "9,999"),
+    @conformance.FailReason::ValueMismatch,
+  )
+  // 完全不同（不是数值）→ 说不准
   assert_eq(
     attribute(decimal_context(), "abc", "xyz"),
     @conformance.FailReason::Other,
   )
-  // 数字不同且不成前缀
-  assert_eq(
-    attribute(decimal_context(), "1,234", "9,999"),
-    @conformance.FailReason::Other,
-  )
-  // 空输出（不做猜测：可能是没实现，也可能是别的问题）
+  // 空输出（可能是没实现，也可能是别的问题）→ 说不准
   assert_eq(
     attribute(decimal_context(), "1,234", ""),
     @conformance.FailReason::Other,
   )
-  // 紧凑格式但数字毫无关系
+  // 紧凑格式但数字毫无关系（含字母，不算纯数值）→ 说不准
   assert_eq(
     attribute(compact_context(), "1.2K", "9M"),
     @conformance.FailReason::Other,

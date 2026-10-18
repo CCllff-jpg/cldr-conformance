@@ -9,6 +9,7 @@ pub fn FailReason::label(self : FailReason) -> String {
     BidiControlMissing => "bidi-control-missing"
     CompactFormMismatch => "compact-form-mismatch"
     PatternSyntaxUnsupported => "pattern-syntax-unsupported"
+    ValueMismatch => "value-mismatch"
     Other => "other"
   }
 }
@@ -24,6 +25,7 @@ pub fn FailReason::all() -> Array[FailReason] {
     BidiControlMissing,
     CompactFormMismatch,
     PatternSyntaxUnsupported,
+    ValueMismatch,
     Other,
   ]
 }
@@ -189,17 +191,22 @@ fn suite_summaries(results : Array[CaseResult]) -> Array[SuiteSummary] {
 
 ///|
 /// 从执行结果构建单个适配器的报告。
+///
+/// `limit` 为负时采用 `failure_sample_limit()`；需要看全部样例时传一个很大的数
+/// （CLI 的 `--all-samples` 就是这么用的）。
 pub fn AdapterReport::from_results(
   adapter_id : String,
   results : Array[CaseResult],
+  limit? : Int = -1,
 ) -> AdapterReport {
+  let cap = if limit < 0 { failure_sample_limit() } else { limit }
   let mine = results.filter(result => result.adapter_id == adapter_id)
   let failures : Array[FailureDetail] = []
   let errors : Array[ErrorDetail] = []
   for result in mine {
     match result.outcome {
       Fail(reason~, expected~, actual~) =>
-        if failures.length() < failure_sample_limit() {
+        if failures.length() < cap {
           failures.push({
             suite: result.suite,
             source: result.source,
@@ -211,7 +218,7 @@ pub fn AdapterReport::from_results(
           })
         }
       Errored(detail~) =>
-        if errors.length() < failure_sample_limit() {
+        if errors.length() < cap {
           errors.push({
             suite: result.suite,
             source: result.source,
@@ -238,10 +245,11 @@ pub fn Report::from_results(
   baseline : String,
   adapter_ids : Array[String],
   results : Array[CaseResult],
+  limit? : Int = -1,
 ) -> Report {
   let adapters : Array[AdapterReport] = []
   for adapter_id in adapter_ids {
-    adapters.push(AdapterReport::from_results(adapter_id, results))
+    adapters.push(AdapterReport::from_results(adapter_id, results, limit~))
   }
   { baseline, adapters, summary: RunSummary::from_results(results), }
 }

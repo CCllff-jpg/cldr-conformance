@@ -344,17 +344,45 @@ fn separator_diff_is_grouping(expected : String, actual : String) -> Bool {
 }
 
 ///|
+/// 字母区块里的**标点/符号**（这些不是"文字内容"）。
+///
+/// 典型坑：阿拉伯语百分号 `٪`(U+066A) 落在阿拉伯字母区块内，
+/// 若按区块范围一概当作字母，`٠٫٨٣١٧٦٥٪؜` 这种纯数值串会被判成"含文字"，
+/// 从而丢掉本该命中的精度归因（实测踩过）。
+fn is_script_punctuation(unit : Int) -> Bool {
+  match unit {
+    0x060C
+    | 0x061B
+    | 0x061F
+    | 0x066A
+    | 0x066B
+    | 0x066C
+    | 0x066D
+    | 0x06D4
+    | 0x00D7
+    | 0x00F7 => true
+    _ => false
+  }
+}
+
+///|
 /// 是否"像字母"：ASCII 字母，或基本多文种平面里常见的字母区块。
 ///
-/// 刻意**排除 ASCII 标点**：`{|42|}` 这类的括号不属于"文字内容"，
-/// 否则会把"语法结构差异"误判成复数词形差异（踩过这个坑）。
+/// 刻意**排除标点与符号**：`{|42|}` 的括号、阿拉伯语百分号 `٪` 都不属于"文字内容"，
+/// 否则会把"语法/数值差异"误判成复数词形差异（踩过这个坑）。
 fn is_letterish(unit : Int) -> Bool {
   if is_ascii_letter(unit) {
     return true
   }
-  // 拉丁扩展 / 希腊 / 西里尔 / 希伯来 / 阿拉伯 / 天城文 / 孟加拉 / 泰 / 藏 / 缅甸 …
-  if unit > 0x00BF && unit < 0x2000 {
-    return digit_value(unit) is None && !is_separator(unit)
+  // 拉丁扩展 / 希腊 / 西里尔
+  if unit >= 0x00C0 && unit <= 0x052F {
+    return !is_script_punctuation(unit)
+  }
+  // 希伯来 / 阿拉伯 / 天城文 / 孟加拉 / 泰 / 藏 / 缅甸 / 高棉 / 蒙古 …
+  if unit >= 0x0590 && unit <= 0x1CFF {
+    return !is_script_punctuation(unit) &&
+      digit_value(unit) is None &&
+      !is_separator(unit)
   }
   // 假名 / CJK 部首 / CJK 统一表意 / 谚文
   (unit >= 0x3040 && unit <= 0x30FF) ||
@@ -542,6 +570,18 @@ pub fn attribute_all(
     (prefix_related || looks_like_precision(expected, actual)) &&
     !reasons.contains(@conformance.FailReason::RoundingMismatch) {
     reasons.push(@conformance.FailReason::RoundingMismatch)
+  }
+  // 数值本身不同（既不是精度问题，也不是格式问题）→ 实现**算错了**
+  //
+  // 典型：百分比计算溢出（`1234565.0` 的 123,456,500% 变成 -1,097,551.584%）。
+  // 与格式类差异分开报告，因为修复方向完全不同。
+  if is_numeric_like(expected) &&
+    is_numeric_like(actual) &&
+    expected_digits != actual_digits &&
+    !prefix_related &&
+    !looks_like_precision(expected, actual) &&
+    !reasons.contains(@conformance.FailReason::RoundingMismatch) {
+    reasons.push(@conformance.FailReason::ValueMismatch)
   }
   if reasons.length() == 0 {
     reasons.push(@conformance.FailReason::Other)

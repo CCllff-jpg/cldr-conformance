@@ -189,6 +189,8 @@ async fn main {
     manifest.cldr_version,
     selected_ids,
     results,
+    // `--all-samples`：把失败样例上限放大，便于诊断（正常报告仍只留少量样例）
+    limit=if has_flag(args, "--all-samples") { 100000 } else { -1 },
   )
   match format {
     "json" => println(report.to_json())

@@ -36,6 +36,9 @@ pub(all) enum FailReason {
   BidiControlMissing
   CompactFormMismatch
   PatternSyntaxUnsupported
+  /// **数值本身**不同（不是格式层面）：例如百分比计算溢出、符号反了、量级错。
+  /// 与"格式差异"分开，是因为修复方向完全不同——这是**算错了**，不是**排版错了**。
+  ValueMismatch
   Other
 } derive(Debug, Eq)
 
