@@ -10,6 +10,10 @@ pub fn FailReason::label(self : FailReason) -> String {
     CompactFormMismatch => "compact-form-mismatch"
     PatternSyntaxUnsupported => "pattern-syntax-unsupported"
     ValueMismatch => "value-mismatch"
+    UnexpectedError => "unexpected-error"
+    MissingError => "missing-error"
+    WrongErrorClass => "wrong-error-class"
+    MessageTextMismatch => "message-text-mismatch"
     Other => "other"
   }
 }
@@ -26,6 +30,10 @@ pub fn FailReason::all() -> Array[FailReason] {
     CompactFormMismatch,
     PatternSyntaxUnsupported,
     ValueMismatch,
+    UnexpectedError,
+    MissingError,
+    WrongErrorClass,
+    MessageTextMismatch,
     Other,
   ]
 }

@@ -122,8 +122,9 @@ fn compare_message(
           if text == expected {
             @conformance.CaseOutcome::Pass
           } else {
+            // 两边都给出文本，但内容不同：格式走通了，渲染结果不对
             @conformance.CaseOutcome::Fail(
-              reason=@conformance.FailReason::Other,
+              reason=@conformance.FailReason::MessageTextMismatch,
               expected~,
               actual=text,
             )
@@ -132,8 +133,9 @@ fn compare_message(
           if case.expects_parts && case.expected_errors.length() == 0 {
             @conformance.CaseOutcome::Unsupported(feature="exp-parts")
           } else {
+            // 规范要求报错，实现却成功格式化
             @conformance.CaseOutcome::Fail(
-              reason=@conformance.FailReason::Other,
+              reason=@conformance.FailReason::MissingError,
               expected=join_strings(case.expected_errors),
               actual="格式化成功（期望报错）",
             )
@@ -142,8 +144,9 @@ fn compare_message(
     Errors(types) =>
       match case.exp {
         Some(expected) =>
+          // 规范要求输出文本，实现却报错（例如未解析变量应回退为原文而非报错）
           @conformance.CaseOutcome::Fail(
-            reason=@conformance.FailReason::Other,
+            reason=@conformance.FailReason::UnexpectedError,
             expected~,
             actual="报错：\{join_strings(types)}",
           )
@@ -151,8 +154,9 @@ fn compare_message(
           if errors_match(case.expected_errors, types) {
             @conformance.CaseOutcome::Pass
           } else {
+            // 都报错了，但类别不同——有映射表（见 adapters/lampclaw）才可能对上
             @conformance.CaseOutcome::Fail(
-              reason=@conformance.FailReason::Other,
+              reason=@conformance.FailReason::WrongErrorClass,
               expected=join_strings(case.expected_errors),
               actual=join_strings(types),
             )

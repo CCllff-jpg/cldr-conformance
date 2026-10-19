@@ -39,6 +39,14 @@ pub(all) enum FailReason {
   /// **数值本身**不同（不是格式层面）：例如百分比计算溢出、符号反了、量级错。
   /// 与"格式差异"分开，是因为修复方向完全不同——这是**算错了**，不是**排版错了**。
   ValueMismatch
+  /// MF2：期望输出文本，实现却报了错（多数是"未解析变量应回退为原文"这类规范行为）
+  UnexpectedError
+  /// MF2：期望报错，实现却成功输出了文本
+  MissingError
+  /// MF2：两边都报错，但错误类别不同（映射表见 `adapters/lampclaw`）
+  WrongErrorClass
+  /// MF2：两边都输出了文本，但内容不同
+  MessageTextMismatch
   Other
 } derive(Debug, Eq)
 

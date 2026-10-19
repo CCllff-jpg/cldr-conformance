@@ -36,7 +36,7 @@ test "FailReason 的稳定标识互不重复" {
     assert_false(labels.contains(label))
     labels.push(label)
   }
-  assert_eq(labels.length(), 9)
+  assert_eq(labels.length(), 13)
   assert_eq(
     @cldr-conformance.FailReason::GroupingMismatch.label(),
     "grouping-mismatch",

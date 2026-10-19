@@ -180,6 +180,10 @@ pub(all) enum FailReason {
   CompactFormMismatch
   PatternSyntaxUnsupported
   ValueMismatch
+  UnexpectedError
+  MissingError
+  WrongErrorClass
+  MessageTextMismatch
   Other
 } derive(Eq, @debug.Debug)
 pub fn FailReason::all() -> Array[Self]
