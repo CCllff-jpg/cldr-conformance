@@ -69,3 +69,31 @@ test "库没有 scientific / compact 的数字 API" {
   // 见 `可比性映射.md` 与 `--attribution-matrix`。
   assert_true(true)
 }
+
+///|
+test "整数字符串解析（复数样本用）" {
+  assert_eq(parse_count("0"), Some(0))
+  assert_eq(parse_count("17"), Some(17))
+  assert_eq(parse_count("-1"), Some(-1))
+  assert_eq(parse_count("1.5"), None)
+  assert_eq(parse_count(""), None)
+}
+
+///|
+/// 真实调用：英语 1 → one、2 → other；阿拉伯语覆盖全部六个类别。
+test "调用 moonlocale 取复数类别" {
+  let adapter = MoonlocaleAdapter::new()
+  let pick = fn(locale : String, value : String) -> String {
+    try adapter.plural_category(locale, value) catch {
+      _ => "<raised>"
+    } noraise {
+      category => category
+    }
+  }
+  assert_eq(pick("en", "1"), "one")
+  assert_eq(pick("en", "2"), "other")
+  assert_eq(pick("ar", "0"), "zero")
+  assert_eq(pick("ar", "2"), "two")
+  assert_eq(pick("ru", "3"), "few")
+  assert_eq(pick("ru", "5"), "many")
+}

@@ -14,3 +14,6 @@ pub extend MoonlocaleAdapter with @conformance.NumberAdapter::{
 
 ///|
 pub extend MoonlocaleAdapterError with @debug.Debug::{to_repr}
+
+///|
+pub extend MoonlocaleAdapter with @conformance.PluralAdapter::{plural_category}

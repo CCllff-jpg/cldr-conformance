@@ -33,9 +33,11 @@ async fn main {
       name="moonlocale 0.1.0",
       capabilities=@conformance.AdapterCapabilities::new([
         @conformance.AdapterCapability::Decimal,
+        @conformance.AdapterCapability::Plural,
       ]),
     ),
     number=Some(moonlocale as &@conformance.NumberAdapter),
+    plural=Some(moonlocale as &@conformance.PluralAdapter),
   )
   // 生态里唯一的原生 MF2 实现；只声明它实际具备的能力。
   let lampclaw = @lampclaw.LampclawMf2Adapter::new()

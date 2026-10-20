@@ -9,6 +9,8 @@ import {
 // Values
 pub fn canonical_locale_tag(String) -> String
 
+pub fn parse_count(String) -> Int?
+
 pub fn parse_decimal(String) -> @zlhahaha/moonlocale.Decimal?
 
 // Errors
@@ -28,8 +30,10 @@ pub fn MoonlocaleAdapter::format_number(Self, String, String, style~ : @cldr-con
 pub fn MoonlocaleAdapter::name(Self) -> String
 pub fn MoonlocaleAdapter::new() -> Self
 pub fn MoonlocaleAdapter::not_equal(Self, Self) -> Bool
+pub fn MoonlocaleAdapter::plural_category(Self, String, String) -> String raise
 pub fn MoonlocaleAdapter::to_repr(Self) -> @debug.Repr
 pub impl @cldr-conformance.NumberAdapter for MoonlocaleAdapter
+pub impl @cldr-conformance.PluralAdapter for MoonlocaleAdapter
 
 // Type aliases
 

@@ -139,3 +139,58 @@ pub impl @conformance.NumberAdapter for MoonlocaleAdapter with fn format_number(
       raise MoonlocaleAdapterError::UnsupportedStyle(style="currency")
   }
 }
+
+///|
+/// 十进制整数字符串 → Int（复数样本只取整数）。
+pub fn parse_count(text : String) -> Int32? {
+  if text.length() == 0 {
+    return None
+  }
+  let mut index = 0
+  let mut negative = false
+  if unit_at(text, 0) == 0x002D {
+    negative = true
+    index = 1
+  }
+  let mut value = 0
+  let mut digits = 0
+  while index < text.length() {
+    let unit = unit_at(text, index)
+    if unit < 0x0030 || unit > 0x0039 {
+      return None
+    }
+    value = value * 10 + (unit - 0x0030)
+    digits += 1
+    index += 1
+  }
+  if digits == 0 {
+    return None
+  }
+  Some(if negative { -value } else { value })
+}
+
+///|
+pub impl @conformance.PluralAdapter for MoonlocaleAdapter with fn name(self) {
+  self.label
+}
+
+///|
+/// 复数类别选择。库的 `cardinal_plural` 只接受整数，
+/// 与本语料只取 `@integer` 样本的选择一致。
+pub impl @conformance.PluralAdapter for MoonlocaleAdapter with fn plural_category(
+  self,
+  locale,
+  value,
+) {
+  ignore(self)
+  let tag = canonical_locale_tag(locale)
+  let parsed = match @upstream.Locale::from_string(tag) {
+    Some(parsed) => parsed
+    None => raise MoonlocaleAdapterError::UnknownLocale(tag~)
+  }
+  let count = match parse_count(value) {
+    Some(count) => count
+    None => raise MoonlocaleAdapterError::UnparsableValue(value~)
+  }
+  @upstream.cardinal_plural(parsed, count).name()
+}
