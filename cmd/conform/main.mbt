@@ -69,7 +69,9 @@ async fn main {
   let manifest = @source.load_manifest("fixtures/SOURCES.json")
   // json / markdown 是**机器可读**输出：stdout 只能是报告本身，
   // 否则 `moon run cmd/conform -- --format json > report.json` 得到的不是合法 JSON。
-  let machine_readable = format == "json" || format == "markdown"
+  let machine_readable = format == "json" ||
+    format == "markdown" ||
+    format == "html"
   if !machine_readable {
     println("cldr-conformance · conform")
     println("已选择适配器：\{selected.length()}")
@@ -235,6 +237,7 @@ async fn main {
   match format {
     "json" => println(report.to_json())
     "markdown" => println(report.to_markdown())
+    "html" => println(report.to_html())
     _ => {
       println(
         "执行结果（\{results.length()} 条结果 = 用例 × 适配器）",

@@ -244,3 +244,65 @@ test "Markdown 报告：含矩阵、归因分布与字符级差异" {
   assert_true(md.contains("errored"))
   assert_true(md.contains("崩溃"))
 }
+
+///|
+test "to_html：自包含、转义、控制符可视化" {
+  let results : Array[@cldr-conformance.CaseResult] = [
+    {
+      suite: @cldr-conformance.Suite::Decimal,
+      adapter_id: "demo",
+      source: "decimals.tsv",
+      location: "L3",
+      outcome: @cldr-conformance.CaseOutcome::Fail(
+        reason=@cldr-conformance.FailReason::GroupingMismatch,
+        expected="1,234",
+        actual="1 234",
+      ),
+      elapsed_ms: 0,
+    },
+    {
+      suite: @cldr-conformance.Suite::Decimal,
+      adapter_id: "demo",
+      source: "decimals.tsv",
+      location: "L4",
+      outcome: @cldr-conformance.CaseOutcome::Fail(
+        reason=@cldr-conformance.FailReason::BidiControlMissing,
+        expected="0\u{200E}%\u{200E}",
+        actual="0%",
+      ),
+      elapsed_ms: 0,
+    },
+    {
+      suite: @cldr-conformance.Suite::Decimal,
+      adapter_id: "demo",
+      source: "decimals.tsv",
+      location: "L5",
+      outcome: @cldr-conformance.CaseOutcome::Fail(
+        reason=@cldr-conformance.FailReason::ValueMismatch,
+        expected="a<b & c",
+        actual="a>b",
+      ),
+      elapsed_ms: 0,
+    },
+  ]
+  let report = @cldr-conformance.Report::from_results(
+    "release-49-beta3",
+    ["demo"],
+    results,
+  )
+  let html = report.to_html()
+  // 基本结构
+  assert_true(html.contains("<!DOCTYPE html>"))
+  assert_true(html.contains("<style>"))
+  assert_true(html.contains("一致率矩阵"))
+  assert_true(html.contains("失败归因分布"))
+  // **自包含**：没有脚本、没有外链（可直接发布为静态页）
+  assert_false(html.contains("<script"))
+  assert_false(html.contains("http://"))
+  // 控制符可视化：不留裸控制符，改为标记
+  assert_false(html.contains("\u{200E}"))
+  assert_true(html.contains("U+200E"))
+  // HTML 转义：期望值里的 < > & 不能原样进文档
+  assert_false(html.contains("a<b & c"))
+  assert_true(html.contains("a&lt;b &amp; c"))
+}

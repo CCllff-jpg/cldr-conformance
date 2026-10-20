@@ -411,3 +411,269 @@ pub fn Report::to_markdown(self : Report) -> String {
   }
   out.to_string()
 }
+
+///|
+/// HTML 转义（`<`, `>`, `&`, `"`）。
+fn html_escape(text : String) -> String {
+  let out = StringBuilder()
+  let mut index = 0
+  while index < text.length() {
+    let unit = text[index].to_int()
+    if unit == 0x0026 {
+      out.write_string("&amp;")
+    } else if unit == 0x003C {
+      out.write_string("&lt;")
+    } else if unit == 0x003E {
+      out.write_string("&gt;")
+    } else if unit == 0x0022 {
+      out.write_string("&quot;")
+    } else {
+      out.write_substring(text, index, 1)
+    }
+    index += 1
+  }
+  out.to_string()
+}
+
+///|
+/// 把双向控制符渲染成可见标记，避免 RTL 文本把页面排版带乱。
+///
+/// 这是本项目的一个实际需求：CLDR 的期望值里大量出现 U+200E/U+200F/U+061C，
+/// 直接输出会让人看不出差异在哪里。
+fn html_visible_controls(text : String) -> String {
+  let out = StringBuilder()
+  let mut index = 0
+  while index < text.length() {
+    let unit = text[index].to_int()
+    if unit == 0x200E || unit == 0x200F || unit == 0x061C || unit == 0x200B {
+      out.write_string("<span class=\"ctrl\">U+")
+      out.write_string(hex4(unit))
+      out.write_string("</span>")
+    } else if unit >= 0x2066 && unit <= 0x2069 {
+      out.write_string("<span class=\"ctrl\">U+")
+      out.write_string(hex4(unit))
+      out.write_string("</span>")
+    } else if unit == 0x0026 {
+      out.write_string("&amp;")
+    } else if unit == 0x003C {
+      out.write_string("&lt;")
+    } else if unit == 0x003E {
+      out.write_string("&gt;")
+    } else if unit == 0x0022 {
+      out.write_string("&quot;")
+    } else {
+      out.write_substring(text, index, 1)
+    }
+    index += 1
+  }
+  out.to_string()
+}
+
+///|
+fn hex4(unit : Int32) -> String {
+  let digits = "0123456789ABCDEF"
+  let out = StringBuilder()
+  let mut shift = 12
+  while shift >= 0 {
+    let digit = (unit >> shift) & 0xF
+    out.write_substring(digits, digit, 1)
+    shift -= 4
+  }
+  out.to_string()
+}
+
+///|
+fn html_bar(rate : Double) -> String {
+  let percent = if rate < 0.0 { 0.0 } else if rate > 1.0 { 1.0 } else { rate }
+  let width = (percent * 100.0).to_int()
+  "<div class=\"bar\"><span style=\"width:\{width}%\"></span></div>"
+}
+
+///|
+fn html_style() -> String {
+  let out = StringBuilder()
+  out.write_string("<style>\n")
+  out.write_string(
+    ":root{--fg:#1a1a1a;--mute:#6b7280;--line:#e5e7eb;--bg:#fff;--soft:#f9fafb;--ok:#16a34a;--bad:#dc2626;--warn:#d97706}\n",
+  )
+  out.write_string("*{box-sizing:border-box}\n")
+  out.write_string(
+    "body{margin:0;padding:32px 20px 64px;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans CJK SC',sans-serif}\n",
+  )
+  out.write_string("main{max-width:1040px;margin:0 auto}\n")
+  out.write_string("h1{font-size:24px;margin:0 0 4px}\n")
+  out.write_string(
+    "h2{font-size:18px;margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}\n",
+  )
+  out.write_string("h3{font-size:15px;margin:20px 0 6px}\n")
+  out.write_string(".meta{color:var(--mute);font-size:13px;margin:0 0 8px}\n")
+  out.write_string(
+    "code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;background:var(--soft);padding:1px 5px;border-radius:4px}\n",
+  )
+  out.write_string(
+    "table{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:14px}\n",
+  )
+  out.write_string(
+    "th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}\n",
+  )
+  out.write_string(
+    "th{color:var(--mute);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}\n",
+  )
+  out.write_string(
+    "td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}\n",
+  )
+  out.write_string(
+    ".bar{width:92px;height:6px;background:var(--line);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}\n",
+  )
+  out.write_string(
+    ".bar span{display:block;height:100%;background:var(--ok)}\n",
+  )
+  out.write_string(".bar.bad span{background:var(--bad)}\n")
+  out.write_string(
+    ".ctrl{color:var(--warn);border:1px dashed var(--warn);border-radius:3px;padding:0 3px;font-size:11px;font-family:ui-monospace,monospace}\n",
+  )
+  out.write_string(
+    "details{border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:8px 0;background:var(--soft)}\n",
+  )
+  out.write_string("details summary{cursor:pointer;font-size:13px}\n")
+  out.write_string("details .row{margin:8px 0 0;font-size:13px}\n")
+  out.write_string(
+    "details .lbl{color:var(--mute);display:inline-block;width:56px}\n",
+  )
+  out.write_string(
+    "pre{margin:6px 0 0;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow-x:auto;font-size:13px}\n",
+  )
+  out.write_string(
+    "footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);color:var(--mute);font-size:12px}\n",
+  )
+  out.write_string("</style>\n")
+  out.to_string()
+}
+
+///|
+/// 渲染为**自包含**的静态 HTML（无外部资源），可直接发布为静态页面。
+///
+/// 与 `to_markdown` 的信息量一致，但多了两点：一致率用条形直观显示；
+/// 双向控制符渲染成可见标记（`U+200E` 之类），否则 RTL 期望值会把页面排版带乱、
+/// 也看不出差异在哪。
+pub fn Report::to_html(self : Report) -> String {
+  let out = StringBuilder()
+  out.write_string("<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n")
+  out.write_string("<meta charset=\"utf-8\">\n")
+  out.write_string(
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n",
+  )
+  out.write_string("<title>CLDR 一致性报告</title>\n")
+  out.write_string(html_style())
+  out.write_string("\n</head>\n<body>\n<main>\n")
+  out.write_string("<h1>CLDR 一致性报告</h1>\n")
+  out.write_string(
+    "<p class=\"meta\">数据基线 <code>\{html_escape(self.baseline)}</code> · 用例总数 \{self.summary.total} · 适配器 \{self.adapters.length()} 个</p>\n",
+  )
+  out.write_string(
+    "<p class=\"meta\">一致率分母只含**可比**用例：<code>unsupported</code>（实现无此能力）与 <code>not-installed</code> 不计入。</p>\n",
+  )
+  // 1) 一致率矩阵
+  out.write_string("<h2>一致率矩阵</h2>\n<table>\n<thead><tr>")
+  out.write_string(
+    "<th>适配器</th><th>套件</th><th class=\"num\">用例</th><th>一致率</th><th class=\"num\">pass</th><th class=\"num\">fail</th><th class=\"num\">errored</th><th class=\"num\">unsupported</th>",
+  )
+  out.write_string("</tr></thead>\n<tbody>\n")
+  for adapter in self.adapters {
+    for row in adapter.by_suite {
+      render_suite_row(out, adapter.adapter_id, row.suite.label(), row.summary)
+    }
+    render_suite_row(out, adapter.adapter_id, "合计", adapter.summary)
+  }
+  out.write_string("</tbody>\n</table>\n")
+  // 2) 归因分布
+  out.write_string("<h2>失败归因分布</h2>\n")
+  for adapter in self.adapters {
+    if adapter.by_reason.is_empty() {
+      continue
+    }
+    out.write_string(
+      "<h3>\{html_escape(adapter.adapter_id)}</h3>\n<table>\n<thead><tr><th>原因</th><th class=\"num\">次数</th><th>占比</th></tr></thead>\n<tbody>\n",
+    )
+    let total = adapter.summary.failed
+    for entry in adapter.by_reason {
+      let share = if total > 0 {
+        entry.count.to_double() / total.to_double()
+      } else {
+        0.0
+      }
+      out.write_string(
+        "<tr><td><code>\{html_escape(entry.reason.label())}</code></td>",
+      )
+      out.write_string("<td class=\"num\">\{entry.count}</td>")
+      out.write_string("<td>\{html_bar(share)}</td></tr>\n")
+    }
+    out.write_string("</tbody>\n</table>\n")
+  }
+  // 3) 失败样例
+  out.write_string("<h2>失败样例</h2>\n")
+  out.write_string(
+    "<p class=\"meta\">每个适配器最多展示 \{failure_sample_limit()} 条；计数与分布始终是完整的。控制符以标记形式显示。</p>\n",
+  )
+  for adapter in self.adapters {
+    if adapter.failures.is_empty() {
+      continue
+    }
+    for detail in adapter.failures {
+      let summary = "\{html_escape(detail.source)} \{html_escape(detail.location)} · \{html_escape(detail.reason.label())}"
+      out.write_string("<details><summary>\{summary}</summary>\n")
+      out.write_string(
+        "<div class=\"row\"><span class=\"lbl\">期望</span><code>\{html_visible_controls(detail.expected)}</code></div>\n",
+      )
+      out.write_string(
+        "<div class=\"row\"><span class=\"lbl\">实际</span><code>\{html_visible_controls(detail.actual)}</code></div>\n",
+      )
+      if detail.diff.index >= 0 {
+        out.write_string(
+          "<div class=\"row\"><span class=\"lbl\">首个差异</span>第 \{detail.diff.index} 个码元<br>期望片段 <code>\{html_visible_controls(detail.diff.expected_snippet)}</code><br>实际片段 <code>\{html_visible_controls(detail.diff.actual_snippet)}</code></div>\n",
+        )
+      }
+      out.write_string("</details>\n")
+    }
+  }
+  // 4) 复现
+  out.write_string("<h2>复现</h2>\n<pre>")
+  out.write_string(
+    "git clone https://github.com/CCllff-jpg/cldr-conformance &amp;&amp; cd cldr-conformance\nmoon test\nmoon run cmd/conform -- --impls &lt;id&gt; --format html &gt; report.html",
+  )
+  out.write_string("</pre>\n")
+  out.write_string(
+    "<footer>数据来自 CLDR 官方测试数据（Unicode License v3），逐文件 SHA256 记录在 <code>DATA-SOURCES.json</code>；本项目只通过公开 API 调用被测实现，不改其源码。<br>本页面由 <code>cldr-conformance</code> 生成，自包含、无外部依赖。</footer>\n",
+  )
+  out.write_string("</main>\n</body>\n</html>\n")
+  out.to_string()
+}
+
+///|
+fn render_suite_row(
+  out : StringBuilder,
+  adapter_id : String,
+  suite : String,
+  summary : RunSummary,
+) -> Unit {
+  let rate = summary.pass_rate()
+  let judged = summary.total - summary.unsupported - summary.not_installed
+  let bar_class = if judged == 0 {
+    "bar"
+  } else if rate < 0.5 {
+    "bar bad"
+  } else {
+    "bar"
+  }
+  out.write_string(
+    "<tr><td><code>\{html_escape(adapter_id)}</code></td><td>\{html_escape(suite)}</td>",
+  )
+  out.write_string("<td class=\"num\">\{summary.total}</td>")
+  out.write_string(
+    "<td><div class=\"\{bar_class}\"><span style=\"width:\{(rate * 100.0).to_int()}%\"></span></div> \{summary.pass_rate_text()}</td>",
+  )
+  out.write_string("<td class=\"num\">\{summary.passed}</td>")
+  out.write_string("<td class=\"num\">\{summary.failed}</td>")
+  out.write_string("<td class=\"num\">\{summary.errored}</td>")
+  out.write_string("<td class=\"num\">\{summary.unsupported}</td></tr>\n")
+}

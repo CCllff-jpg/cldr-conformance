@@ -34,7 +34,7 @@ let reasons = @conformance.FailReason::all() // 9 个归因类别
 作为工具使用时，跑 CLI 即可（需要仓库内的 `fixtures/`）：
 
 ```
-moon run cmd/conform -- --impls moonlocale --format markdown
+moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format html > report.html
 ```
 
 ## 解决什么问题

@@ -1,0 +1,399 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLDR 一致性报告</title>
+<style>
+:root{--fg:#1a1a1a;--mute:#6b7280;--line:#e5e7eb;--bg:#fff;--soft:#f9fafb;--ok:#16a34a;--bad:#dc2626;--warn:#d97706}
+*{box-sizing:border-box}
+body{margin:0;padding:32px 20px 64px;background:var(--bg);color:var(--fg);font:15px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans CJK SC',sans-serif}
+main{max-width:1040px;margin:0 auto}
+h1{font-size:24px;margin:0 0 4px}
+h2{font-size:18px;margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+h3{font-size:15px;margin:20px 0 6px}
+.meta{color:var(--mute);font-size:13px;margin:0 0 8px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;background:var(--soft);padding:1px 5px;border-radius:4px}
+table{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--mute);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.bar{width:92px;height:6px;background:var(--line);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.bar span{display:block;height:100%;background:var(--ok)}
+.bar.bad span{background:var(--bad)}
+.ctrl{color:var(--warn);border:1px dashed var(--warn);border-radius:3px;padding:0 3px;font-size:11px;font-family:ui-monospace,monospace}
+details{border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:8px 0;background:var(--soft)}
+details summary{cursor:pointer;font-size:13px}
+details .row{margin:8px 0 0;font-size:13px}
+details .lbl{color:var(--mute);display:inline-block;width:56px}
+pre{margin:6px 0 0;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow-x:auto;font-size:13px}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);color:var(--mute);font-size:12px}
+</style>
+
+</head>
+<body>
+<main>
+<h1>CLDR 一致性报告</h1>
+<p class="meta">数据基线 <code>release-49-beta3</code> · 用例总数 31635 · 适配器 3 个</p>
+<p class="meta">一致率分母只含**可比**用例：<code>unsupported</code>（实现无此能力）与 <code>not-installed</code> 不计入。</p>
+<h2>一致率矩阵</h2>
+<table>
+<thead><tr><th>适配器</th><th>套件</th><th class="num">用例</th><th>一致率</th><th class="num">pass</th><th class="num">fail</th><th class="num">errored</th><th class="num">unsupported</th></tr></thead>
+<tbody>
+<tr><td><code>moonlocale</code></td><td>decimal</td><td class="num">2625</td><td><div class="bar bad"><span style="width:42%"></span></div> 42%</td><td class="num">449</td><td class="num">601</td><td class="num">0</td><td class="num">1575</td></tr>
+<tr><td><code>moonlocale</code></td><td>datetime</td><td class="num">1752</td><td><div class="bar"><span style="width:0%"></span></div> 0%</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">1752</td></tr>
+<tr><td><code>moonlocale</code></td><td>plural</td><td class="num">5831</td><td><div class="bar"><span style="width:85%"></span></div> 85%</td><td class="num">4964</td><td class="num">867</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td><code>moonlocale</code></td><td>message-format-2</td><td class="num">337</td><td><div class="bar"><span style="width:0%"></span></div> 0%</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">337</td></tr>
+<tr><td><code>moonlocale</code></td><td>合计</td><td class="num">10545</td><td><div class="bar"><span style="width:78%"></span></div> 78%</td><td class="num">5413</td><td class="num">1468</td><td class="num">0</td><td class="num">3664</td></tr>
+<tr><td><code>lampclaw-i18n</code></td><td>decimal</td><td class="num">2625</td><td><div class="bar"><span style="width:0%"></span></div> 0%</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">2625</td></tr>
+<tr><td><code>lampclaw-i18n</code></td><td>datetime</td><td class="num">1752</td><td><div class="bar"><span style="width:0%"></span></div> 0%</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">1752</td></tr>
+<tr><td><code>lampclaw-i18n</code></td><td>plural</td><td class="num">5831</td><td><div class="bar"><span style="width:0%"></span></div> 0%</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">5831</td></tr>
+<tr><td><code>lampclaw-i18n</code></td><td>message-format-2</td><td class="num">337</td><td><div class="bar"><span style="width:80%"></span></div> 80%</td><td class="num">271</td><td class="num">66</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td><code>lampclaw-i18n</code></td><td>合计</td><td class="num">10545</td><td><div class="bar"><span style="width:80%"></span></div> 80%</td><td class="num">271</td><td class="num">66</td><td class="num">0</td><td class="num">10208</td></tr>
+<tr><td><code>moon_l10n</code></td><td>decimal</td><td class="num">2625</td><td><div class="bar"><span style="width:0%"></span></div> 0%</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">2625</td></tr>
+<tr><td><code>moon_l10n</code></td><td>datetime</td><td class="num">1752</td><td><div class="bar"><span style="width:0%"></span></div> 0%</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">1752</td></tr>
+<tr><td><code>moon_l10n</code></td><td>plural</td><td class="num">5831</td><td><div class="bar"><span style="width:83%"></span></div> 83%</td><td class="num">4844</td><td class="num">987</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td><code>moon_l10n</code></td><td>message-format-2</td><td class="num">337</td><td><div class="bar"><span style="width:0%"></span></div> 0%</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">337</td></tr>
+<tr><td><code>moon_l10n</code></td><td>合计</td><td class="num">10545</td><td><div class="bar"><span style="width:83%"></span></div> 83%</td><td class="num">4844</td><td class="num">987</td><td class="num">0</td><td class="num">4714</td></tr>
+</tbody>
+</table>
+<h2>失败归因分布</h2>
+<h3>moonlocale</h3>
+<table>
+<thead><tr><th>原因</th><th class="num">次数</th><th>占比</th></tr></thead>
+<tbody>
+<tr><td><code>grouping-mismatch</code></td><td class="num">194</td><td><div class="bar"><span style="width:13%"></span></div></td></tr>
+<tr><td><code>digit-system-mismatch</code></td><td class="num">63</td><td><div class="bar"><span style="width:4%"></span></div></td></tr>
+<tr><td><code>rounding-mismatch</code></td><td class="num">208</td><td><div class="bar"><span style="width:14%"></span></div></td></tr>
+<tr><td><code>plural-category-mismatch</code></td><td class="num">867</td><td><div class="bar"><span style="width:59%"></span></div></td></tr>
+<tr><td><code>bidi-control-missing</code></td><td class="num">6</td><td><div class="bar"><span style="width:0%"></span></div></td></tr>
+<tr><td><code>value-mismatch</code></td><td class="num">103</td><td><div class="bar"><span style="width:7%"></span></div></td></tr>
+<tr><td><code>other</code></td><td class="num">27</td><td><div class="bar"><span style="width:1%"></span></div></td></tr>
+</tbody>
+</table>
+<h3>lampclaw-i18n</h3>
+<table>
+<thead><tr><th>原因</th><th class="num">次数</th><th>占比</th></tr></thead>
+<tbody>
+<tr><td><code>unexpected-error</code></td><td class="num">64</td><td><div class="bar"><span style="width:96%"></span></div></td></tr>
+<tr><td><code>message-text-mismatch</code></td><td class="num">2</td><td><div class="bar"><span style="width:3%"></span></div></td></tr>
+</tbody>
+</table>
+<h3>moon_l10n</h3>
+<table>
+<thead><tr><th>原因</th><th class="num">次数</th><th>占比</th></tr></thead>
+<tbody>
+<tr><td><code>plural-category-mismatch</code></td><td class="num">987</td><td><div class="bar"><span style="width:100%"></span></div></td></tr>
+</tbody>
+</table>
+<h2>失败样例</h2>
+<p class="meta">每个适配器最多展示 20 条；计数与分布始终是完整的。控制符以标记形式显示。</p>
+<details><summary>decimals.tsv L3 · grouping-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>1.2</code></div>
+<div class="row"><span class="lbl">实际</span><code>1٫2</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>1.2</code><br>实际片段 <code>1٫2</code></div>
+</details>
+<details><summary>decimals.tsv L4 · rounding-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>0.008318</code></div>
+<div class="row"><span class="lbl">实际</span><code>0٫008</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>0.008318</code><br>实际片段 <code>0٫008</code></div>
+</details>
+<details><summary>decimals.tsv L5 · grouping-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>1,234,565</code></div>
+<div class="row"><span class="lbl">实际</span><code>1٬234٬565</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>1,234,565</code><br>实际片段 <code>1٬234٬565</code></div>
+</details>
+<details><summary>decimals.tsv L6 · grouping-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code><span class="ctrl">U+200E</span>-1,230.05</code></div>
+<div class="row"><span class="lbl">实际</span><code>-1٬230٫05</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code><span class="ctrl">U+200E</span>-1,230.05</code><br>实际片段 <code>-1٬230٫05</code></div>
+</details>
+<details><summary>decimals.tsv L7 · bidi-control-missing</summary>
+<div class="row"><span class="lbl">期望</span><code>0<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>0%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>0<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code><br>实际片段 <code>0%</code></div>
+</details>
+<details><summary>decimals.tsv L8 · bidi-control-missing</summary>
+<div class="row"><span class="lbl">期望</span><code>120<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>120%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 3 个码元<br>期望片段 <code>120<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code><br>实际片段 <code>120%</code></div>
+</details>
+<details><summary>decimals.tsv L9 · rounding-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>0.831765<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>0٫832%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>0.831765<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code><br>实际片段 <code>0٫832%</code></div>
+</details>
+<details><summary>decimals.tsv L10 · value-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>123,456,500<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>-1٬097٬551٫584%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>123,456,500<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code><br>实际片段 <code>-1٬097٬551٫584…</code></div>
+</details>
+<details><summary>decimals.tsv L11 · grouping-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code><span class="ctrl">U+200E</span>-123,005<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>-123٬005%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code><span class="ctrl">U+200E</span>-123,005<span class="ctrl">U+200E</span>%<span class="ctrl">U+200E</span></code><br>实际片段 <code>-123٬005%</code></div>
+</details>
+<details><summary>decimals.tsv L27 · digit-system-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>٠</code></div>
+<div class="row"><span class="lbl">实际</span><code>0</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>٠</code><br>实际片段 <code>0</code></div>
+</details>
+<details><summary>decimals.tsv L28 · digit-system-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>١٫٢</code></div>
+<div class="row"><span class="lbl">实际</span><code>1٫2</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>١٫٢</code><br>实际片段 <code>1٫2</code></div>
+</details>
+<details><summary>decimals.tsv L29 · rounding-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>٠٫٠٠٨٣١٨</code></div>
+<div class="row"><span class="lbl">实际</span><code>0٫008</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>٠٫٠٠٨٣١٨</code><br>实际片段 <code>0٫008</code></div>
+</details>
+<details><summary>decimals.tsv L30 · digit-system-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>١٬٢٣٤٬٥٦٥</code></div>
+<div class="row"><span class="lbl">实际</span><code>1٬234٬565</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>١٬٢٣٤٬٥٦٥</code><br>实际片段 <code>1٬234٬565</code></div>
+</details>
+<details><summary>decimals.tsv L31 · digit-system-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code><span class="ctrl">U+061C</span>-١٬٢٣٠٫٠٥</code></div>
+<div class="row"><span class="lbl">实际</span><code>-1٬230٫05</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code><span class="ctrl">U+061C</span>-١٬٢٣٠٫٠٥</code><br>实际片段 <code>-1٬230٫05</code></div>
+</details>
+<details><summary>decimals.tsv L32 · digit-system-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>٠٪<span class="ctrl">U+061C</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>0%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>٠٪<span class="ctrl">U+061C</span></code><br>实际片段 <code>0%</code></div>
+</details>
+<details><summary>decimals.tsv L33 · digit-system-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>١٢٠٪<span class="ctrl">U+061C</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>120%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>١٢٠٪<span class="ctrl">U+061C</span></code><br>实际片段 <code>120%</code></div>
+</details>
+<details><summary>decimals.tsv L34 · other</summary>
+<div class="row"><span class="lbl">期望</span><code>٠٫٨٣١٧٦٥٪<span class="ctrl">U+061C</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>0٫832%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>٠٫٨٣١٧٦٥٪<span class="ctrl">U+061C</span></code><br>实际片段 <code>0٫832%</code></div>
+</details>
+<details><summary>decimals.tsv L35 · other</summary>
+<div class="row"><span class="lbl">期望</span><code>١٢٣٬٤٥٦٬٥٠٠٪<span class="ctrl">U+061C</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>-1٬097٬551٫584%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>١٢٣٬٤٥٦٬٥٠٠٪<span class="ctrl">U+061C</span></code><br>实际片段 <code>-1٬097٬551٫584…</code></div>
+</details>
+<details><summary>decimals.tsv L36 · digit-system-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code><span class="ctrl">U+061C</span>-١٢٣٬٠٠٥٪<span class="ctrl">U+061C</span></code></div>
+<div class="row"><span class="lbl">实际</span><code>-123٬005%</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code><span class="ctrl">U+061C</span>-١٢٣٬٠٠٥٪<span class="ctrl">U+061C</span></code><br>实际片段 <code>-123٬005%</code></div>
+</details>
+<details><summary>decimals.tsv L52 · digit-system-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>০</code></div>
+<div class="row"><span class="lbl">实际</span><code>0</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>০</code><br>实际片段 <code>0</code></div>
+</details>
+<details><summary>syntax.json #10 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code>hello {$place}</code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>hello {$place}</code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #12 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code>{|a|}</code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>{|a|}</code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #13 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code>{|a|}</code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>{|a|}</code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #14 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code>{$x}</code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>{$x}</code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #15 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code>{$x}</code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable, bad-operand</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>{$x}</code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #16 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code>{$x}</code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable, bad-operand</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>{$x}</code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #17 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code>{:u:f}</code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>{:u:f}</code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #18 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code>{:f}</code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code>{:f}</code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #21 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #22 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #23 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable, unresolved-variable</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #24 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable, unresolved-variable</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #26 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #27 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function, bad-selector</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #28 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unresolved-variable</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unresolved-…</code></div>
+</details>
+<details><summary>syntax.json #34 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function, unknown-function, bad-selector, bad-selector</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #35 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function, bad-selector</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #36 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function, bad-selector</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #37 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function, unknown-function, bad-selector, bad-selector</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>syntax.json #38 · unexpected-error</summary>
+<div class="row"><span class="lbl">期望</span><code></code></div>
+<div class="row"><span class="lbl">实际</span><code>报错：unknown-function, bad-selector</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 0 个码元<br>期望片段 <code></code><br>实际片段 <code>报错：unknown-fun…</code></div>
+</details>
+<details><summary>plurals.xml L2 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L23 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L44 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L65 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L86 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L107 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L128 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L149 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L191 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L212 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L233 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L254 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L275 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L296 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L317 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L338 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L359 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L380 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L401 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<details><summary>plurals.xml L422 · plural-category-mismatch</summary>
+<div class="row"><span class="lbl">期望</span><code>other</code></div>
+<div class="row"><span class="lbl">实际</span><code>one</code></div>
+<div class="row"><span class="lbl">首个差异</span>第 1 个码元<br>期望片段 <code>other</code><br>实际片段 <code>one</code></div>
+</details>
+<h2>复现</h2>
+<pre>git clone https://github.com/CCllff-jpg/cldr-conformance &amp;&amp; cd cldr-conformance
+moon test
+moon run cmd/conform -- --impls &lt;id&gt; --format html &gt; report.html</pre>
+<footer>数据来自 CLDR 官方测试数据（Unicode License v3），逐文件 SHA256 记录在 <code>DATA-SOURCES.json</code>；本项目只通过公开 API 调用被测实现，不改其源码。<br>本页面由 <code>cldr-conformance</code> 生成，自包含、无外部依赖。</footer>
+</main>
+</body>
+</html>
+
