@@ -32,4 +32,5 @@ import {
   "gmlewis/sha256@0.18.0",
   "zlhahaha/moonlocale@0.1.0",
   "lampclaw/i18n@0.9.3",
+  "Zhouz-z/moon_l10n@0.2.0",
 }

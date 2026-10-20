@@ -28,6 +28,8 @@ pub fn run_message(@adapter.AdapterRegistry, Array[String], Array[@cldr-conforma
 
 pub fn run_number(@adapter.AdapterRegistry, Array[String], String, Array[@cldr-conformance.DecimalCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
 
+pub fn run_plural(@adapter.AdapterRegistry, Array[String], String, Array[@cldr-conformance.PluralCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
+
 pub fn run_skeleton(@adapter.AdapterRegistry, Array[String], String, Array[@cldr-conformance.SkeletonCase], EngineConfig) -> Array[@cldr-conformance.CaseResult] raise @adapter.AdapterRegistryError
 
 // Errors

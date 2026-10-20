@@ -19,3 +19,6 @@ pub extend ReferenceNull with @conformance.DatetimeAdapter::{
 pub extend ReferenceNull with @conformance.MessageFormat2Adapter::{
   format_message,
 }
+
+///|
+pub extend ReferenceNull with @conformance.PluralAdapter::{plural_category}

@@ -91,6 +91,7 @@ MoonBit 生态已有至少 5 个 i18n 实现（`moonlocale`、`lampclaw/i18n`、
 |---|---|---|---|
 | `zlhahaha/moonlocale@0.1.0` | 数字 | **42%** | 449 / 1050 可比用例通过；1575 条如实记无能力 |
 | `lampclaw/i18n@0.9.3` | MF2 | **80%** | 271 / 337 通过 |
+| `Zhouz-z/moon_l10n@0.2.0` | 复数 | **83%** | 4844 / 5831 通过 |
 
 `moonlocale` 首批失败已归纳出**两个根因**：257 条指向"数字系统与分隔符选择"、
 208 条指向"默认小数位上限 3"、103 条指向"百分比大数溢出"——
@@ -134,9 +135,9 @@ moon run cmd/conform -- --attribution-matrix                   # 归因对照实
 
 1. **MF2 失败归因细化**：把"本该成功却报错 / 本该报错却成功 / 错误类别不符 / 输出不符"
    拆成独立类别（当前 MF2 的 66 条失败统一记为 `other`）
-2. **复数类别选择套件**：这是唯一在 4 个库之间都有对应 API 的轴
-   （`cardinal_plural` / MF2 `:plural` / `plural_category` / `evaluate_plural_expression`），
-   官方数据只需加 1 个文件（`supplemental/plurals.xml`）
+2. **复数类别选择套件已接入**（`supplemental/plurals.xml` 的样本值，5831 条用例）：
+   已接 `moon_l10n`（83%），继续接 `moonlocale` 的 `cardinal_plural` 与 `moongettext` 的
+   `evaluate_plural_expression`，这是唯一有真实数字的跨库轴
 3. **静态 HTML 报告**：一致率矩阵 + 归因分布 + 字节级对比 + RTL 控制符可视化
 4. **把 4 条缺陷提交给上游**，并补充 MF2 的两条差异
 

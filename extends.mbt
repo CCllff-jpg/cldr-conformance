@@ -159,3 +159,15 @@ pub extend Report with @debug.Debug::{to_repr}
 
 ///|
 pub extend Report with Eq::{equal, not_equal}
+
+///|
+pub extend PluralCase with @debug.Debug::{to_repr}
+
+///|
+pub extend PluralCase with Eq::{equal, not_equal}
+
+///|
+pub extend PluralCorpus with @debug.Debug::{to_repr}
+
+///|
+pub extend PluralCorpus with Eq::{equal, not_equal}

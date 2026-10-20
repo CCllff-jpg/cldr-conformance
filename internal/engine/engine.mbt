@@ -360,3 +360,62 @@ pub fn run_message(
   }
   results
 }
+
+///|
+/// 跑复数类别套件（CLDR `supplemental/plurals.xml` 的样本值）。
+///
+/// 与数字/日期不同，这里的差异只有一种含义：**类别选错了**。
+/// 因此直接比对字符串并归为 `PluralCategoryMismatch`，不需要多维归因——
+/// 期望值来自官方样本，不需要我们实现规则求值。
+pub fn run_plural(
+  registry : @adapter.AdapterRegistry,
+  selected_ids : Array[String],
+  source : String,
+  cases : Array[@conformance.PluralCase],
+  config : EngineConfig,
+) -> Array[@conformance.CaseResult] raise @adapter.AdapterRegistryError {
+  let results : Array[@conformance.CaseResult] = []
+  for case in cases {
+    for adapter_id in selected_ids {
+      results.push(
+        dispatch(
+          @conformance.Suite::Plural,
+          adapter_id,
+          source,
+          "L\{case.line}",
+          registry,
+          selected_ids,
+          [@conformance.AdapterCapability::Plural],
+          config,
+          () => {
+            match registry.plural_adapter(adapter_id) {
+              Some(adapter) =>
+                evaluate_plural(case.expected, () => {
+                  adapter.plural_category(case.locale, case.input)
+                })
+              None => @conformance.CaseOutcome::NotInstalled
+            }
+          },
+        ),
+      )
+    }
+  }
+  results
+}
+
+///|
+fn evaluate_plural(
+  expected : String,
+  run : () -> String raise,
+) -> @conformance.CaseOutcome raise {
+  let actual = run()
+  if actual == expected {
+    @conformance.CaseOutcome::Pass
+  } else {
+    @conformance.CaseOutcome::Fail(
+      reason=@conformance.FailReason::PluralCategoryMismatch,
+      expected~,
+      actual~,
+    )
+  }
+}

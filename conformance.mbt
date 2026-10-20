@@ -3,6 +3,8 @@
 pub(all) enum Suite {
   Decimal
   Datetime
+  /// 复数类别选择（CLDR `supplemental/plurals.xml` 的样本值）
+  Plural
   MessageFormat2
 } derive(Debug, Eq)
 
@@ -80,6 +82,8 @@ pub(all) enum AdapterCapability {
   DecimalCompact
   DatetimeSkeleton
   DatetimeFormat
+  /// 复数类别选择（`moonlocale` / `moon_l10n` / `moongettext` 等都有对应 API）
+  Plural
   MessageFormat2
 } derive(Debug, Eq)
 
@@ -92,6 +96,7 @@ pub fn AdapterCapability::all() -> Array[AdapterCapability] {
     DecimalCompact,
     DatetimeSkeleton,
     DatetimeFormat,
+    Plural,
     MessageFormat2,
   ]
 }
@@ -105,6 +110,7 @@ pub fn AdapterCapability::label(self : AdapterCapability) -> String {
     DecimalCompact => "decimal-compact"
     DatetimeSkeleton => "datetime-skeleton"
     DatetimeFormat => "datetime-format"
+    Plural => "plural"
     MessageFormat2 => "message-format-2"
   }
 }
@@ -212,9 +218,59 @@ pub(open) trait MessageFormat2Adapter {
 }
 
 ///|
+/// 复数类别选择的一条用例。
+///
+/// 期望值直接来自 CLDR `supplemental/plurals.xml` 的 `@integer` 样本
+/// （该文件为每个类别列出示例值），因此**不需要我们自己实现规则求值**——
+/// 这守住了"不实现格式化算法"的 Non-goal。
+pub(all) struct PluralCase {
+  locale : String
+  /// 待测数值，十进制整数字符串
+  input : String
+  /// 期望的类别：zero / one / two / few / many / other
+  expected : String
+  source : String
+  line : Int32
+} derive(Debug, Eq)
+
+///|
+pub(all) struct PluralCorpus {
+  cases : Array[PluralCase]
+} derive(Debug, Eq)
+
+///|
+pub fn PluralCorpus::new(cases : Array[PluralCase]) -> PluralCorpus {
+  { cases, }
+}
+
+///|
+pub fn PluralCorpus::length(self : PluralCorpus) -> Int32 {
+  self.cases.length()
+}
+
+///|
+pub fn PluralCorpus::locales(self : PluralCorpus) -> Array[String] {
+  let seen : Array[String] = []
+  for case in self.cases {
+    if !seen.contains(case.locale) {
+      seen.push(case.locale)
+    }
+  }
+  seen
+}
+
+///|
+/// 复数类别选择适配器。
+pub(open) trait PluralAdapter {
+  fn name(Self) -> String
+  /// 返回 `zero` / `one` / `two` / `few` / `many` / `other` 之一。
+  fn plural_category(Self, locale : String, value : String) -> String raise
+}
+
+///|
 /// 全部套件，顺序即报告中的展示顺序。
 pub fn Suite::all() -> Array[Suite] {
-  [Decimal, Datetime, MessageFormat2]
+  [Decimal, Datetime, Plural, MessageFormat2]
 }
 
 ///|
@@ -223,6 +279,7 @@ pub fn Suite::label(self : Suite) -> String {
   match self {
     Decimal => "decimal"
     Datetime => "datetime"
+    Plural => "plural"
     MessageFormat2 => "message-format-2"
   }
 }

@@ -1,9 +1,10 @@
 ///|
 test "Suite::all 覆盖全部套件且顺序稳定" {
   let suites = @cldr-conformance.Suite::all()
-  assert_eq(suites.length(), 3)
+  assert_eq(suites.length(), 4)
   assert_eq(suites[0], @cldr-conformance.Suite::Decimal)
-  assert_eq(suites[2], @cldr-conformance.Suite::MessageFormat2)
+  assert_eq(suites[2], @cldr-conformance.Suite::Plural)
+  assert_eq(suites[3], @cldr-conformance.Suite::MessageFormat2)
 }
 
 ///|

@@ -1,6 +1,7 @@
 import {
   "CCllff-jpg/cldr-conformance" @conformance,
   "CCllff-jpg/cldr-conformance/adapters/lampclaw",
+  "CCllff-jpg/cldr-conformance/adapters/moon_l10n",
   "CCllff-jpg/cldr-conformance/adapters/moonlocale",
   "CCllff-jpg/cldr-conformance/adapters/reference_null",
   "CCllff-jpg/cldr-conformance/internal/adapter",

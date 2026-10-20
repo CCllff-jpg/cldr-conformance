@@ -1,0 +1,9 @@
+// 被测实现之三：Zhouz-z/moon_l10n@0.2.0
+// 它实现的是 ICU MessageFormat（与 MF2 不同标准），但**复数类别选择**有对应 API，
+// 这是它在三个套件里唯一可直接可比的维度（见 可比性映射.md）。
+
+import {
+  "CCllff-jpg/cldr-conformance" @conformance,
+  "moonbitlang/core/debug",
+  "Zhouz-z/moon_l10n" @upstream,
+}

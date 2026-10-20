@@ -420,6 +420,7 @@ async test "端到端：reference-null 跑完全部真实用例且计数守恒" 
     number=Some(reference_null as &@conformance.NumberAdapter),
     datetime=Some(reference_null as &@conformance.DatetimeAdapter),
     message_format_2=Some(reference_null as &@conformance.MessageFormat2Adapter),
+    plural=Some(reference_null as &@conformance.PluralAdapter),
   )
   let ids = ["reference_null"]
   let config = EngineConfig::default()

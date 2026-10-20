@@ -22,10 +22,12 @@ pub fn ReferenceNull::format_skeleton(Self, String, String, String) -> String ra
 pub fn ReferenceNull::name(Self) -> String
 pub fn ReferenceNull::new() -> Self
 pub fn ReferenceNull::not_equal(Self, Self) -> Bool
+pub fn ReferenceNull::plural_category(Self, String, String) -> String raise
 pub fn ReferenceNull::to_repr(Self) -> @debug.Repr
 pub impl @cldr-conformance.DatetimeAdapter for ReferenceNull
 pub impl @cldr-conformance.MessageFormat2Adapter for ReferenceNull
 pub impl @cldr-conformance.NumberAdapter for ReferenceNull
+pub impl @cldr-conformance.PluralAdapter for ReferenceNull
 
 // Type aliases
 

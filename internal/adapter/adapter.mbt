@@ -34,6 +34,7 @@ struct RegistryEntry {
   number : &@conformance.NumberAdapter?
   datetime : &@conformance.DatetimeAdapter?
   message_format_2 : &@conformance.MessageFormat2Adapter?
+  plural : &@conformance.PluralAdapter?
 }
 
 ///|
@@ -55,6 +56,7 @@ pub fn AdapterRegistry::register(
   number~ : &@conformance.NumberAdapter? = None,
   datetime~ : &@conformance.DatetimeAdapter? = None,
   message_format_2~ : &@conformance.MessageFormat2Adapter? = None,
+  plural~ : &@conformance.PluralAdapter? = None,
 ) -> Unit raise AdapterRegistryError {
   if info.id == "" {
     raise AdapterRegistryError::EmptyId
@@ -84,7 +86,12 @@ pub fn AdapterRegistry::register(
     message_format_2,
   )
 
-  self.entries.push({ info, number, datetime, message_format_2, })
+  let plural_declared = info.capabilities.contains(
+    @conformance.AdapterCapability::Plural,
+  )
+  validate_handler(info.id, "plural", plural_declared, plural)
+
+  self.entries.push({ info, number, datetime, message_format_2, plural, })
 }
 
 ///|
@@ -199,6 +206,19 @@ pub fn AdapterRegistry::message_format_2_adapter(
   for entry in self.entries {
     if entry.info.id == id {
       return entry.message_format_2
+    }
+  }
+  None
+}
+
+///|
+pub fn AdapterRegistry::plural_adapter(
+  self : AdapterRegistry,
+  id : String,
+) -> &@conformance.PluralAdapter? {
+  for entry in self.entries {
+    if entry.info.id == id {
+      return entry.plural
     }
   }
   None

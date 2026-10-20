@@ -21,6 +21,7 @@ async fn main {
     number=Some(reference_null as &@conformance.NumberAdapter),
     datetime=Some(reference_null as &@conformance.DatetimeAdapter),
     message_format_2=Some(reference_null as &@conformance.MessageFormat2Adapter),
+    plural=Some(reference_null as &@conformance.PluralAdapter),
   )
   // 第一个**真实**被测实现：只声明它实际具备的能力。
   // `zlhahaha/moonlocale` 没有 scientific 与 compact 数字 API（实测见 可比性映射.md），
@@ -47,6 +48,18 @@ async fn main {
       ]),
     ),
     message_format_2=Some(lampclaw as &@conformance.MessageFormat2Adapter),
+  )
+  // 只有复数维度可直接可比：该库实现的是 ICU，不参与 MF2 套件。
+  let moon_l10n = @moon_l10n.MoonL10nPluralAdapter::new()
+  registry.register(
+    @adapter.AdapterInfo::new(
+      id="moon_l10n",
+      name="moon_l10n 0.2.0",
+      capabilities=@conformance.AdapterCapabilities::new([
+        @conformance.AdapterCapability::Plural,
+      ]),
+    ),
+    plural=Some(moon_l10n as &@conformance.PluralAdapter),
   )
   let selected = select_adapters(registry, args)
   let selected_ids = selected.map(info => info.id)
@@ -78,6 +91,7 @@ async fn main {
     "fixtures/datetime/skeletons_all_calendars.tsv",
   ).text()
   let datetime_text = @fs.read_file("fixtures/datetime/datetime.json").text()
+  let plural_text = @fs.read_file("fixtures/supplemental/plurals.xml").text()
 
   let decimal = @corpus.decimal_corpus_from_tsv(decimal_text)
   let modern = @corpus.decimal_corpus_from_tsv(modern_text)
@@ -88,6 +102,7 @@ async fn main {
     @corpus.parse_tsv(all_calendars_text),
   )
   let formatted = @corpus.parse_datetime_json(datetime_text)
+  let plural = @corpus.plural_corpus_from_xml(plural_text, "plurals.xml")
   let datetime = @conformance.DatetimeCorpus::new(
     skeletons + all_calendars,
     formatted,
@@ -122,6 +137,9 @@ async fn main {
   if !machine_readable {
     println(
       "  MF2 套件  \{messages.length()} 条用例 / \{messages.files().length()} 个文件 / \{messages.scenarios().length()} 个场景",
+    )
+    println(
+      "  复数套件  plurals.xml                 \{plural.length()} 条用例 / \{plural.locales().length()} 个语言",
     )
   }
 
@@ -196,6 +214,14 @@ async fn main {
     )
   results = results +
     @engine.run_message(registry, selected_ids, message_cases, config)
+  results = results +
+    @engine.run_plural(
+      registry,
+      selected_ids,
+      "plurals.xml",
+      plural.cases,
+      config,
+    )
 
   let report = @conformance.Report::from_results(
     manifest.cldr_version,

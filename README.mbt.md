@@ -88,7 +88,7 @@ moon run cmd/fetch-data -- --sync
 ///|
 test {
   let suites = @cldr-conformance.Suite::all()
-  assert_eq(suites.length(), 3)
+  assert_eq(suites.length(), 4)
   assert_eq(suites[0].label(), "decimal")
 }
 ```

@@ -151,6 +151,7 @@ test "登记表保存并分发三个 suite trait 对象" {
     number=Some(implementation as &@conformance.NumberAdapter),
     datetime=Some(implementation as &@conformance.DatetimeAdapter),
     message_format_2=Some(implementation as &@conformance.MessageFormat2Adapter),
+    plural=Some(implementation as &@conformance.PluralAdapter),
   )
 
   match registry.number_adapter("reference_null") {

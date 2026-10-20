@@ -21,6 +21,8 @@ pub fn parse_skeleton_cases(TsvTable) -> Array[@cldr-conformance.SkeletonCase] r
 
 pub fn parse_tsv(StringView) -> TsvTable
 
+pub fn plural_corpus_from_xml(StringView, String) -> @cldr-conformance.PluralCorpus
+
 pub fn render_tsv(TsvTable) -> String
 
 // Errors

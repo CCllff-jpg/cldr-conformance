@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "CCllff-jpg/cldr-conformance/adapters/moon_l10n"
+
+import {
+  "CCllff-jpg/cldr-conformance",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn parse_count(String) -> Int?
+
+// Errors
+pub(all) suberror MoonL10nPluralAdapterError {
+  BadValue(value~ : String)
+} derive(@debug.Debug)
+pub fn MoonL10nPluralAdapterError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub(all) struct MoonL10nPluralAdapter {
+  label : String
+} derive(Eq, @debug.Debug)
+pub fn MoonL10nPluralAdapter::equal(Self, Self) -> Bool
+pub fn MoonL10nPluralAdapter::name(Self) -> String
+pub fn MoonL10nPluralAdapter::new() -> Self
+pub fn MoonL10nPluralAdapter::not_equal(Self, Self) -> Bool
+pub fn MoonL10nPluralAdapter::plural_category(Self, String, String) -> String raise
+pub fn MoonL10nPluralAdapter::to_repr(Self) -> @debug.Repr
+pub impl @cldr-conformance.PluralAdapter for MoonL10nPluralAdapter
+
+// Type aliases
+
+// Traits

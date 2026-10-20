@@ -29,6 +29,7 @@ pub(all) enum AdapterCapability {
   DecimalCompact
   DatetimeSkeleton
   DatetimeFormat
+  Plural
   MessageFormat2
 } derive(Eq, @debug.Debug)
 pub fn AdapterCapability::all() -> Array[Self]
@@ -274,6 +275,27 @@ pub fn NumberStyle::equal(Self, Self) -> Bool
 pub fn NumberStyle::not_equal(Self, Self) -> Bool
 pub fn NumberStyle::to_repr(Self) -> @debug.Repr
 
+pub(all) struct PluralCase {
+  locale : String
+  input : String
+  expected : String
+  source : String
+  line : Int
+} derive(Eq, @debug.Debug)
+pub fn PluralCase::equal(Self, Self) -> Bool
+pub fn PluralCase::not_equal(Self, Self) -> Bool
+pub fn PluralCase::to_repr(Self) -> @debug.Repr
+
+pub(all) struct PluralCorpus {
+  cases : Array[PluralCase]
+} derive(Eq, @debug.Debug)
+pub fn PluralCorpus::equal(Self, Self) -> Bool
+pub fn PluralCorpus::length(Self) -> Int
+pub fn PluralCorpus::locales(Self) -> Array[String]
+pub fn PluralCorpus::new(Array[PluralCase]) -> Self
+pub fn PluralCorpus::not_equal(Self, Self) -> Bool
+pub fn PluralCorpus::to_repr(Self) -> @debug.Repr
+
 pub(all) struct ReasonCount {
   reason : FailReason
   count : Int
@@ -328,6 +350,7 @@ pub fn SkeletonCase::to_repr(Self) -> @debug.Repr
 pub(all) enum Suite {
   Decimal
   Datetime
+  Plural
   MessageFormat2
 } derive(Eq, @debug.Debug)
 pub fn Suite::all() -> Array[Self]
@@ -361,4 +384,9 @@ pub(open) trait MessageFormat2Adapter {
 pub(open) trait NumberAdapter {
   fn name(Self) -> String
   fn format_number(Self, String, String, style~ : NumberStyle, length~ : NumberLength) -> String raise
+}
+
+pub(open) trait PluralAdapter {
+  fn name(Self) -> String
+  fn plural_category(Self, String, String) -> String raise
 }

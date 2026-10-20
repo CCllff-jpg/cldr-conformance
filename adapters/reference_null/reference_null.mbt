@@ -75,3 +75,21 @@ pub impl @conformance.MessageFormat2Adapter for ReferenceNull with fn format_mes
   ignore(self)
   @conformance.MessageFormat2Result::Formatted(input.source)
 }
+
+///|
+pub impl @conformance.PluralAdapter for ReferenceNull with fn name(self) {
+  self.label
+}
+
+///|
+/// 恒返回一个哨兵类别，保证复数套件在空实现下也可预测地失败。
+pub impl @conformance.PluralAdapter for ReferenceNull with fn plural_category(
+  self,
+  locale,
+  value,
+) {
+  ignore(self)
+  ignore(locale)
+  ignore(value)
+  "<reference-null>"
+}
