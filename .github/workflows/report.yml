@@ -1,0 +1,51 @@
+name: report
+
+# 生成静态报告并作为构建产物归档。
+# 与 ci.yml 分开：这个 job 出问题不影响主流水线的红绿。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: Toolchain version
+        run: moon version --all
+
+      - name: Update dependencies
+        run: moon update
+
+      - name: Verify data manifest (offline)
+        run: moon run cmd/fetch-data -- --verify
+
+      # 只跑三个真实实现；reference_null 会把矩阵弄得很乱。
+      - name: Generate HTML report
+        run: |
+          moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format html > report.html
+          moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format markdown > report.md
+
+      - name: Summarize
+        run: |
+          {
+            echo "### CLDR 一致性报告"
+            echo
+            head -c 4000 report.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cldr-report
+          path: |
+            report.html
+            report.md
+          retention-days: 90

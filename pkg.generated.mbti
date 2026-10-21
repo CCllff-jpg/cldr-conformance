@@ -8,7 +8,11 @@ import {
 // Values
 pub fn char_diff(String, String) -> CharDiff
 
+pub fn disagreements(Array[CaseResult], String, String, limit? : Int) -> Array[Disagreement]
+
 pub fn failure_sample_limit() -> Int
+
+pub fn render_disagreements(Array[Disagreement], String, String) -> String
 
 // Errors
 
@@ -161,6 +165,18 @@ pub fn DecimalCorpus::new(Array[DecimalCase]) -> Self
 pub fn DecimalCorpus::not_equal(Self, Self) -> Bool
 pub fn DecimalCorpus::of_locale(Self, String) -> Array[DecimalCase]
 pub fn DecimalCorpus::to_repr(Self) -> @debug.Repr
+
+pub(all) struct Disagreement {
+  suite : Suite
+  source : String
+  location : String
+  expected : String
+  left : CaseOutcome
+  right : CaseOutcome
+} derive(Eq, @debug.Debug)
+pub fn Disagreement::equal(Self, Self) -> Bool
+pub fn Disagreement::not_equal(Self, Self) -> Bool
+pub fn Disagreement::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ErrorDetail {
   suite : Suite

@@ -171,3 +171,9 @@ pub extend PluralCorpus with @debug.Debug::{to_repr}
 
 ///|
 pub extend PluralCorpus with Eq::{equal, not_equal}
+
+///|
+pub extend Disagreement with @debug.Debug::{to_repr}
+
+///|
+pub extend Disagreement with Eq::{equal, not_equal}

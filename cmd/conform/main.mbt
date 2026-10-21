@@ -234,6 +234,20 @@ async fn main {
     // `--all-samples`：把失败样例上限放大，便于诊断（正常报告仍只留少量样例）
     limit=if has_flag(args, "--all-samples") { 100000 } else { -1 },
   )
+  // `--diff`：列出两个（或两两）适配器在**同一条用例**上的分歧，
+  // 这是"差分对拍"最直接的产物。
+  if has_flag(args, "--diff") && selected_ids.length() >= 2 {
+    let mut i = 0
+    while i + 1 < selected_ids.length() {
+      let left = selected_ids[i]
+      let right = selected_ids[i + 1]
+      let items = @conformance.disagreements(results, left, right, limit=50)
+      println(@conformance.render_disagreements(items, left, right))
+      i += 2
+    }
+    return
+  }
+
   match format {
     "json" => println(report.to_json())
     "markdown" => println(report.to_markdown())

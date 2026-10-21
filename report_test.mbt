@@ -306,3 +306,73 @@ test "to_html：自包含、转义、控制符可视化" {
   assert_false(html.contains("a<b & c"))
   assert_true(html.contains("a&lt;b &amp; c"))
 }
+
+///|
+test "disagreements：只算两边都能判定的分歧" {
+  let pass : @cldr-conformance.CaseOutcome = @cldr-conformance.CaseOutcome::Pass
+  let results : Array[@cldr-conformance.CaseResult] = [
+    // 一致通过：不算分歧
+    {
+      suite: @cldr-conformance.Suite::Plural,
+      adapter_id: "a",
+      source: "plurals.xml",
+      location: "L1",
+      outcome: pass,
+      elapsed_ms: 0,
+    },
+    {
+      suite: @cldr-conformance.Suite::Plural,
+      adapter_id: "b",
+      source: "plurals.xml",
+      location: "L1",
+      outcome: pass,
+      elapsed_ms: 0,
+    },
+    // 分歧：a 通过、b 失败
+    {
+      suite: @cldr-conformance.Suite::Plural,
+      adapter_id: "a",
+      source: "plurals.xml",
+      location: "L2",
+      outcome: pass,
+      elapsed_ms: 0,
+    },
+    {
+      suite: @cldr-conformance.Suite::Plural,
+      adapter_id: "b",
+      source: "plurals.xml",
+      location: "L2",
+      outcome: @cldr-conformance.CaseOutcome::Fail(
+        reason=@cldr-conformance.FailReason::PluralCategoryMismatch,
+        expected="other",
+        actual="one",
+      ),
+      elapsed_ms: 0,
+    },
+    // 能力差异：不算分歧
+    {
+      suite: @cldr-conformance.Suite::Plural,
+      adapter_id: "a",
+      source: "plurals.xml",
+      location: "L3",
+      outcome: pass,
+      elapsed_ms: 0,
+    },
+    {
+      suite: @cldr-conformance.Suite::Plural,
+      adapter_id: "b",
+      source: "plurals.xml",
+      location: "L3",
+      outcome: @cldr-conformance.CaseOutcome::Unsupported(feature="plural"),
+      elapsed_ms: 0,
+    },
+  ]
+  let items = @cldr-conformance.disagreements(results, "a", "b", limit=10)
+  assert_eq(items.length(), 1)
+  assert_eq(items[0].location, "L2")
+  assert_eq(items[0].expected, "other")
+  // 渲染里应当同时给出两边的结论
+  let markdown = @cldr-conformance.render_disagreements(items, "a", "b")
+  assert_true(markdown.contains("分歧：1 条"))
+  assert_true(markdown.contains("通过 · 失败"))
+}

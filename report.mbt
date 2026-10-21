@@ -677,3 +677,138 @@ fn render_suite_row(
   out.write_string("<td class=\"num\">\{summary.errored}</td>")
   out.write_string("<td class=\"num\">\{summary.unsupported}</td></tr>\n")
 }
+
+///|
+/// 两个适配器在**同一条用例**上的分歧：一边通过、另一边没通过。
+///
+/// 这是"差分对拍"的直接产物：报告里"库 A 42%、库 B 85%"只能说明各自水平，
+/// 而分歧清单指出的是**同一个输入下两者行为不同**——这才是"差在哪里"。
+pub(all) struct Disagreement {
+  suite : Suite
+  source : String
+  location : String
+  expected : String
+  left : CaseOutcome
+  right : CaseOutcome
+} derive(Debug, Eq)
+
+///|
+fn outcome_passed(outcome : CaseOutcome) -> Bool {
+  outcome is Pass
+}
+
+///|
+/// 只有"两边都能判定"的用例才算分歧；能力差异（`unsupported` / `not-installed`）不算。
+fn outcome_comparable(outcome : CaseOutcome) -> Bool {
+  match outcome {
+    Unsupported(_) | NotInstalled => false
+    _ => true
+  }
+}
+
+///|
+/// 找出两个适配器在同一条用例上的分歧。
+///
+/// 用例身份用 `suite + source + location` 三元组（与报告里的定位一致）。
+pub fn disagreements(
+  results : Array[CaseResult],
+  left_id : String,
+  right_id : String,
+  limit~ : Int32 = -1,
+) -> Array[Disagreement] {
+  let cap = if limit < 0 { failure_sample_limit() } else { limit }
+  let index : Map[String, (Suite, String, String, CaseOutcome)] = Map([])
+  for result in results {
+    if result.adapter_id == left_id {
+      index[case_key(result.suite, result.source, result.location)] = (
+        result.suite,
+        result.source,
+        result.location,
+        result.outcome,
+      )
+    }
+  }
+  let out : Array[Disagreement] = []
+  for result in results {
+    if result.adapter_id != right_id || out.length() >= cap {
+      continue
+    }
+    match index.get(case_key(result.suite, result.source, result.location)) {
+      Some((suite, source, location, left_outcome)) => {
+        let right_outcome = result.outcome
+        if outcome_comparable(left_outcome) &&
+          outcome_comparable(right_outcome) &&
+          outcome_passed(left_outcome) != outcome_passed(right_outcome) {
+          out.push({
+            suite,
+            source,
+            location,
+            expected: expected_of(right_outcome, left_outcome),
+            left: left_outcome,
+            right: right_outcome,
+          })
+        }
+      }
+      None => ()
+    }
+  }
+  out
+}
+
+///|
+/// 取两侧的期望值（`Pass` 没有期望值，用另一侧或空串）。
+fn expected_of(primary : CaseOutcome, fallback : CaseOutcome) -> String {
+  match primary {
+    Fail(expected~, ..) => expected
+    _ =>
+      match fallback {
+        Fail(expected~, ..) => expected
+        _ => ""
+      }
+  }
+}
+
+///|
+fn case_key(suite : Suite, source : String, location : String) -> String {
+  "\{suite.label()}|\{source}|\{location}"
+}
+
+///|
+/// 渲染分歧清单（Markdown）。
+pub fn render_disagreements(
+  items : Array[Disagreement],
+  left_id : String,
+  right_id : String,
+) -> String {
+  let out = StringBuilder()
+  out.write_string(
+    "### `\{left_id}` 与 `\{right_id}` 的分歧：\{items.length()} 条\n\n",
+  )
+  if items.is_empty() {
+    out.write_string("两边在所有共同可比的用例上结论一致。\n")
+    return out.to_string()
+  }
+  out.write_string(
+    "> 只统计两边都能判定的用例；能力差异（unsupported）不算分歧。\n\n",
+  )
+  out.write_string("| 用例 | 期望 | 结果 |\n|---|---|---|\n")
+  for item in items {
+    let left = outcome_brief(item.left)
+    let right = outcome_brief(item.right)
+    out.write_string(
+      "| `\{item.source}` \{item.location} | `\{item.expected}` | \{left} · \{right} |\n",
+    )
+  }
+  out.to_string()
+}
+
+///|
+fn outcome_brief(outcome : CaseOutcome) -> String {
+  match outcome {
+    Pass => "通过"
+    Fail(actual~, ..) => "失败 `\{actual}`"
+    Errored(detail~) => "异常 `\{detail}`"
+    Unsupported(feature~) => "不支持 \{feature}"
+    NotInstalled => "未安装"
+  }
+}

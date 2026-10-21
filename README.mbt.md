@@ -43,6 +43,22 @@ MoonBit 生态已有多个 i18n 实现（`moonlocale`、`lampclaw/i18n`、`moon_
 
 CLDR 官方公开了一致性测试数据（`common/testData/`，见 `DATA-SOURCES.md`），本项目把它变成可执行的基准。
 
+## 当前结果（CLDR `release-49-beta3`，10545 条用例）
+
+| 被测实现 | 数字（2625） | 日期（1752） | 复数（5831） | MF2（337） |
+|---|---|---|---|---|
+| `zlhahaha/moonlocale` 0.1.0 | **42%**（449/1050 可比） | 无此能力 | **85%**（4964/5831） | 无此能力 |
+| `lampclaw/i18n` 0.9.3 | 无此能力 | 无此能力 | 未接入 | **80%**（271/337） |
+| `Zhouz-z/moon_l10n` 0.2.0 | 无此能力 | 无此能力 | **83%**（4844/5831） | ICU，不可比 |
+
+- 一致率分母**只含可比用例**：`unsupported`（实现没有这个能力）与 `not-installed` 都不计入，
+  否则会用 0% 去污蔑一个"根本没这能力"的库。
+- 完整报告（含归因分布与逐条失败样例）：[`report.html`](report.html)（自包含，可直接用浏览器打开）
+- 复现：
+
+  ```
+  moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format html > report.html
+  ```
 ## 范围（Scope）
 
 - 读取 CLDR 官方测试数据，产出**可复现**的一致率矩阵与失败归因
