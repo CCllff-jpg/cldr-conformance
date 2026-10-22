@@ -19,7 +19,7 @@ MoonBit 生态已有至少 5 个 i18n 实现（`moonlocale`、`lampclaw/i18n`、
 各自实现了复数规则、数字与日期格式化。但**没有任何工具能回答：它们是否符合 CLDR 标准、彼此差在哪里。**
 
 实测证据：早期的 `moon search 'cldr'` 返回 **0 个结果**——一致性验证是完全空白的赛道，
-而 CLDR 官方早已公开了权威一致性测试数据（`common/testData/`，共 4714 条用例）。
+而 CLDR 官方早已公开了权威一致性测试数据（`common/testData/`，另有复数规则的官方样本值）；本项目已解析成 **10545 条用例**。
 
 **这个空白有实际代价**：本项目接上第一个真实库后，立刻发现 4 个具体缺陷，其中两个是严重问题
 （数字系统按 locale 选择相反；百分比计算对大数溢出成负数）。这些用肉眼读代码很难发现，
@@ -37,14 +37,14 @@ MoonBit 生态已有至少 5 个 i18n 实现（`moonlocale`、`lampclaw/i18n`、
 - **不修改被测包源码**——只通过公开 API 调用，缺陷以最小可复现用例反馈上游
 - **不追求"全绿"**——`unsupported`（实现没这个能力）与 `fail`（做错了）严格区分并如实记录
 
-## 四、已完成（截至 2026-10-19，33 个提交全部公开可查，已发布 mooncakes.io 0.1.1）
+## 四、已完成（截至 2026-10-22，46 个提交全部公开可查，已发布 mooncakes.io 0.1.1）
 
 ### 4.1 数据与用例
 
 | 项 | 结果 |
 |---|---|
 | **数据管线** | 按**不可变 tag** `release-49-beta3` 拉取 CLDR 官方文件；SHA256 清单；`--verify` 离线校验；幂等重跑 |
-| **用例模型** | 解析成 **4714 条可执行用例**：数字 2625、日期 1752（骨架 + 格式化）、MF2 337 |
+| **用例模型** | 解析成 **10545 条可执行用例**：数字 2625、日期 1752（骨架 + 格式化）、复数 5831、MF2 337 |
 | **可复现性** | 一条命令重跑全流程：`moon run cmd/conform -- --impls <id> --format markdown` |
 
 ### 4.2 执行引擎与失败归因
@@ -115,7 +115,7 @@ MoonBit 生态已有至少 5 个 i18n 实现（`moonlocale`、`lampclaw/i18n`、
 | 项 | 结果 |
 |---|---|
 | **已发布** | `CCllff-jpg/cldr-conformance@0.1.1`（mooncakes.io）；空项目 `moon add` 后可直接调用 |
-| **测试** | **136 个**全绿（含 4 个跨库真实用例端到端） |
+| **测试** | **142 个**全绿（含 4 个跨库真实用例端到端）；`--deny-warn` 亦通过 |
 | **静态检查** | `moon check --target all` 零警告 |
 | **CI** | 每次 push 跑检查 + 测试 + 数据离线校验，全绿 |
 | **规模** | 源码 32 个文件 / 4593 行；测试 22 个文件 / 2473 行（合计 **7066 行**） |
@@ -125,22 +125,31 @@ MoonBit 生态已有至少 5 个 i18n 实现（`moonlocale`、`lampclaw/i18n`、
 ```bash
 git clone https://github.com/CCllff-jpg/cldr-conformance && cd cldr-conformance
 
-moon test                                                      # 136/136 通过
+moon test                                                      # 142/142 通过
 moon run cmd/fetch-data -- --verify                            # 离线校验官方数据
 moon run cmd/conform -- --impls moonlocale --format markdown    # 数字套件 42%
 moon run cmd/conform -- --impls lampclaw-i18n --format markdown # MF2 套件 80%
 moon run cmd/conform -- --attribution-matrix                   # 归因对照实验（100%/100%）
 ```
 
-## 五、10 月 31 日前将交付
+## 五、10 月 31 日前将交付（更新于 10/22）
 
-1. **MF2 失败归因细化**：把"本该成功却报错 / 本该报错却成功 / 错误类别不符 / 输出不符"
-   拆成独立类别（当前 MF2 的 66 条失败统一记为 `other`）
-2. **复数类别选择套件已接入**（`supplemental/plurals.xml` 的样本值，5831 条用例）：
-   已接 `moon_l10n`（83%），继续接 `moonlocale` 的 `cardinal_plural` 与 `moongettext` 的
-   `evaluate_plural_expression`，这是唯一有真实数字的跨库轴
-3. **静态 HTML 报告**：一致率矩阵 + 归因分布 + 字节级对比 + RTL 控制符可视化
-4. **把 4 条缺陷提交给上游**，并补充 MF2 的两条差异
+### 已完成
+
+1. **MF2 失败归因细化**：拆成 `unexpected-error` / `missing-error` / `wrong-error-class` /
+   `message-text-mismatch` 四类，MF2 的 `other` 归零（64 + 2）
+2. **复数类别选择套件**：`supplemental/plurals.xml` 的官方样本值，5831 条用例；
+   已接 `moon_l10n`（**83%**）与 `moonlocale`（**85%**）——这是唯一有真实数字的跨库轴
+3. **静态 HTML 报告**：一致率矩阵 + 归因分布 + **差分视图** + 失败样例；
+   已迁移到 `docs/index.html` 并启用 GitHub Pages，可在线访问
+4. **差分视图**：`--diff` 列出两个库在**同一条用例**上的分歧（数值与网页里都有）
+
+### 待完成
+
+5. **把 6 条缺陷提交给上游**：草案与最小复现已备好（`upstream-issues/`），提交后回填链接
+
+> `moongettext` 的 `evaluate_plural_expression` 不接入：它返回的是 gettext 的**复数索引**，
+> 不是 CLDR 类别，映射关系依赖各 catalog 的书写顺序，无法作为 ground truth。
 
 > 说明：原计划写的是"至少 3 个真实适配器"。按 `可比性映射.md` 的实测结论，
 > `Zhouz-z/moon_l10n` 实现的是 **ICU MessageFormat**，与本项目三个套件（数字 / 日期 / MF2）
