@@ -72,18 +72,19 @@ You can browse and install extra skills here:
 
 ## 2. 现在做到哪、下一步做什么
 
-- **已完成**：数据管线（D2）、用例模型（D3–D4，4714 条）、适配器契约与登记（M1）、
-  执行引擎（M2）、失败归因与报告模型（M3）、**第一个真实适配器（M4）**。
+- **已完成**：数据管线、用例模型（**10545 条**：数字 2625 / 日期 1752 / 复数 5831 / MF2 337）、
+  适配器契约与登记、执行引擎、失败归因与报告（JSON / Markdown / **HTML**）、
+  **3 个真实适配器**（`moonlocale` / `moon_l10n` / `lampclaw-i18n`）、
+  **差分视图**（`--diff`：两库在同一条用例上的分歧）。
   归因对照实验：单一维度 **7445/7445**、复合维度 **6299/6299**（均为 100%）。
-- **已发布**：`CCllff-jpg/cldr-conformance@0.1.1` 已上架 mooncakes.io
-  （验收硬门槛，10/18 完成，比计划提前 8 天）。
-- **下一步**：接第二个真实库（`lampclaw/i18n` 的 MF2）→ 静态 HTML 报告 →
-  把 `upstream-issues/` 里的两条严重问题提交给上游。
-  三家库的可比性逐条对照见 `可比性映射.md`——注意结论：日期骨架套件无人可比、
-  数字只有 moonlocale 直接可比、MF2 只有 `lampclaw/i18n` 可比，而
-  **`Zhouz-z/moon_l10n` 实现的是 ICU（不同标准）**，不可用 MF2 语法去判它。
-- 测试 132 个全绿；`moon run cmd/conform -- --attribution-matrix` 可复现归因对照实验；
-  `--all-samples` 可导出全部失败样例用于诊断。
+- **已发布**：`CCllff-jpg/cldr-conformance@0.1.1`（mooncakes.io）
+- **现在的结果**：moonlocale 数字 42% / 复数 85%；moon_l10n 复数 83%；
+  lampclaw MF2 80%。日期套件至今**没有任何库可比**（无人提供 skeleton→pattern 能力）。
+- **下一步**：把 `upstream-issues/` 的 6 条提交给上游（[`待提交清单.md`](upstream-issues/待提交清单.md)
+  已备好直链与可复制正文）→ 开 GitHub Pages（`Settings → Pages → main` / `/docs`）
+  → 截止前冻结。
+- 测试 **142** 个全绿；`--attribution-matrix` 复现归因实验；`--all-samples` 导出全部失败样例；
+  `--diff` 看两库分歧；`--format html` 出报告（生成到 `docs/index.html`）。
 
 ## 3. 硬性约束（违反会被 CI 拦下或影响验收）
 
