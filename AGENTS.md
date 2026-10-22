@@ -75,7 +75,7 @@ You can browse and install extra skills here:
 - **已完成**：数据管线（D2）、用例模型（D3–D4，4714 条）、适配器契约与登记（M1）、
   执行引擎（M2）、失败归因与报告模型（M3）、**第一个真实适配器（M4）**。
   归因对照实验：单一维度 **7445/7445**、复合维度 **6299/6299**（均为 100%）。
-- **已发布**：`CCllff-jpg/cldr-conformance@0.1.0` 已上架 mooncakes.io
+- **已发布**：`CCllff-jpg/cldr-conformance@0.1.1` 已上架 mooncakes.io
   （验收硬门槛，10/18 完成，比计划提前 8 天）。
 - **下一步**：接第二个真实库（`lampclaw/i18n` 的 MF2）→ 静态 HTML 报告 →
   把 `upstream-issues/` 里的两条严重问题提交给上游。

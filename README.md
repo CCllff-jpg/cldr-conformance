@@ -8,7 +8,7 @@
 
 [![mooncakes](https://img.shields.io/badge/mooncakes-CCllff--jpg%2Fcldr--conformance-2ea44f)](https://mooncakes.io/details/CCllff-jpg/cldr-conformance)
 
-> 状态：**已发布到 mooncakes.io（`CCllff-jpg/cldr-conformance@0.1.0`）**。
+> 状态：**已发布到 mooncakes.io（`CCllff-jpg/cldr-conformance@0.1.1`）**。
 > CLDR 官方数据可按不可变 tag 拉取、离线校验并幂等重跑，已解析成 **4714 条用例**
 > （数字 2625 / 日期 1752 / MF2 337）；执行引擎、失败归因与报告模型（JSON / Markdown）
 > 均已接入，并已跑出**第一份真实一致率矩阵**（见 `首轮发现.md`）。

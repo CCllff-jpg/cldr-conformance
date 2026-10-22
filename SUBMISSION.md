@@ -5,7 +5,7 @@
 | **项目名称** | cldr-conformance —— CLDR 一致性基准与差分对拍工具链 |
 | **参赛者** | CCllff-jpg |
 | **公开仓库** | <https://github.com/CCllff-jpg/cldr-conformance> |
-| **已发布** | [`CCllff-jpg/cldr-conformance@0.1.0`](https://mooncakes.io/details/CCllff-jpg/cldr-conformance)（mooncakes.io，2026-10-18） |
+| **已发布** | [`CCllff-jpg/cldr-conformance@0.1.1`](https://mooncakes.io/details/CCllff-jpg/cldr-conformance)（mooncakes.io，2026-10-18） |
 | **项目类型** | 全新项目（新仓库、新 MoonBit 模块） |
 | **赛事方向** | 开发者工具 / 工具库 |
 | **许可证** | 代码 Apache-2.0；数据 Unicode License v3 |
@@ -37,7 +37,7 @@ MoonBit 生态已有至少 5 个 i18n 实现（`moonlocale`、`lampclaw/i18n`、
 - **不修改被测包源码**——只通过公开 API 调用，缺陷以最小可复现用例反馈上游
 - **不追求"全绿"**——`unsupported`（实现没这个能力）与 `fail`（做错了）严格区分并如实记录
 
-## 四、已完成（截至 2026-10-19，33 个提交全部公开可查，已发布 mooncakes.io 0.1.0）
+## 四、已完成（截至 2026-10-19，33 个提交全部公开可查，已发布 mooncakes.io 0.1.1）
 
 ### 4.1 数据与用例
 
@@ -114,7 +114,7 @@ MoonBit 生态已有至少 5 个 i18n 实现（`moonlocale`、`lampclaw/i18n`、
 
 | 项 | 结果 |
 |---|---|
-| **已发布** | `CCllff-jpg/cldr-conformance@0.1.0`（mooncakes.io）；空项目 `moon add` 后可直接调用 |
+| **已发布** | `CCllff-jpg/cldr-conformance@0.1.1`（mooncakes.io）；空项目 `moon add` 后可直接调用 |
 | **测试** | **136 个**全绿（含 4 个跨库真实用例端到端） |
 | **静态检查** | `moon check --target all` 零警告 |
 | **CI** | 每次 push 跑检查 + 测试 + 数据离线校验，全绿 |
