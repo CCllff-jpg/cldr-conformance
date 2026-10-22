@@ -382,7 +382,7 @@ pub fn run_plural(
           @conformance.Suite::Plural,
           adapter_id,
           source,
-          "L\{case.line}",
+          "\{case.locale} · L\{case.line}",
           registry,
           selected_ids,
           [@conformance.AdapterCapability::Plural],

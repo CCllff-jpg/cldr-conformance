@@ -557,6 +557,20 @@ fn html_style() -> String {
 /// 双向控制符渲染成可见标记（`U+200E` 之类），否则 RTL 期望值会把页面排版带乱、
 /// 也看不出差异在哪。
 pub fn Report::to_html(self : Report) -> String {
+  self.render_html(None)
+}
+
+///|
+/// 带**差分视图**的 HTML：需要原始结果才能算出两两分歧。
+pub fn Report::to_html_with(
+  self : Report,
+  results : Array[CaseResult],
+) -> String {
+  self.render_html(Some(results))
+}
+
+///|
+fn Report::render_html(self : Report, results : Array[CaseResult]?) -> String {
   let out = StringBuilder()
   out.write_string("<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n")
   out.write_string("<meta charset=\"utf-8\">\n")
@@ -635,6 +649,25 @@ pub fn Report::to_html(self : Report) -> String {
       }
       out.write_string("</details>\n")
     }
+  }
+  // 3.5) 差分视图：两两比较选中适配器的分歧
+  match results {
+    Some(items) =>
+      if self.adapters.length() >= 2 {
+        out.write_string("<h2>差分视图</h2>\n")
+        out.write_string(
+          "<p class=\"meta\">同一个输入下两个实现的行为差异。只统计两边都能判定的用例——能力差异不算分歧。</p>\n",
+        )
+        let mut index = 0
+        while index + 1 < self.adapters.length() {
+          let left = self.adapters[index].adapter_id
+          let right = self.adapters[index + 1].adapter_id
+          let pairs = disagreements(items, left, right, limit=20)
+          out.write_string(html_disagreements(pairs, left, right))
+          index += 2
+        }
+      }
+    None => ()
   }
   // 4) 复现
   out.write_string("<h2>复现</h2>\n<pre>")
@@ -811,4 +844,39 @@ fn outcome_brief(outcome : CaseOutcome) -> String {
     Unsupported(feature~) => "不支持 \{feature}"
     NotInstalled => "未安装"
   }
+}
+
+///|
+/// 渲染一对适配器的分歧（HTML）。
+fn html_disagreements(
+  items : Array[Disagreement],
+  left_id : String,
+  right_id : String,
+) -> String {
+  let out = StringBuilder()
+  out.write_string(
+    "<h3><code>\{html_escape(left_id)}</code> 与 <code>\{html_escape(right_id)}</code> 的分歧：\{items.length()} 条</h3>\n",
+  )
+  if items.is_empty() {
+    out.write_string(
+      "<p class=\"meta\">两边在共同可比的用例上结论一致。</p>\n",
+    )
+    return out.to_string()
+  }
+  out.write_string(
+    "<table><thead><tr><th>用例</th><th>期望</th><th>结论（左 · 右）</th></tr></thead>\n<tbody>\n",
+  )
+  for item in items {
+    out.write_string(
+      "<tr><td><code>\{html_escape(item.source)}</code> \{html_escape(item.location)}</td>",
+    )
+    out.write_string(
+      "<td><code>\{html_visible_controls(item.expected)}</code></td>",
+    )
+    out.write_string(
+      "<td>\{html_escape(outcome_brief(item.left))} · \{html_escape(outcome_brief(item.right))}</td></tr>\n",
+    )
+  }
+  out.write_string("</tbody></table>\n")
+  out.to_string()
 }

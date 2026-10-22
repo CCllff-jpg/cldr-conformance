@@ -251,7 +251,7 @@ async fn main {
   match format {
     "json" => println(report.to_json())
     "markdown" => println(report.to_markdown())
-    "html" => println(report.to_html())
+    "html" => println(report.to_html_with(results))
     _ => {
       println(
         "执行结果（\{results.length()} 条结果 = 用例 × 适配器）",
