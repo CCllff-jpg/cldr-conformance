@@ -53,11 +53,12 @@ CLDR 官方公开了一致性测试数据（`common/testData/`，见 `DATA-SOURC
 
 - 一致率分母**只含可比用例**：`unsupported`（实现没有这个能力）与 `not-installed` 都不计入，
   否则会用 0% 去污蔑一个"根本没这能力"的库。
-- 完整报告（含归因分布与逐条失败样例）：[`report.html`](report.html)（自包含，可直接用浏览器打开）
+- 完整报告（含归因分布、差分视图与逐条失败样例）：[`docs/index.html`](docs/index.html)
+  —— 自包含静态页，可直接用浏览器打开；仓库开启 GitHub Pages（`main` / `/docs`）后可通过 Pages 地址访问
 - 复现：
 
   ```
-  moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format html > report.html
+  moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format html > docs/index.html
   ```
 ## 范围（Scope）
 

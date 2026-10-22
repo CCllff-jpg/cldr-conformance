@@ -31,7 +31,7 @@ jobs:
       # 只跑三个真实实现；reference_null 会把矩阵弄得很乱。
       - name: Generate HTML report
         run: |
-          moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format html > report.html
+          moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format html > docs/index.html
           moon run cmd/conform -- --impls moonlocale,lampclaw-i18n,moon_l10n --format markdown > report.md
 
       - name: Summarize
@@ -46,6 +46,6 @@ jobs:
         with:
           name: cldr-report
           path: |
-            report.html
+            docs/index.html
             report.md
           retention-days: 90
