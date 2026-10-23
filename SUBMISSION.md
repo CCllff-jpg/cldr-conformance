@@ -24,7 +24,7 @@ CLDR 数据按不可变 tag 拉取、逐文件 SHA256 校验，解析成用例�
 
 - 可 `moon add` 的工具库与 CLI（已发布 0.1.1）
 - 三个真实库的一致率矩阵：moonlocale 数字 42%、复数 85%；moon_l10n 复数 83%；lampclaw/i18n 消息格式 80%
-- 6 条带最小复现的缺陷反馈，其中 2 条已提交上游
+- 6 条带最小复现的缺陷反馈，其中 2 条已提交上游（`zlhahaha/moonlocale` [#1](https://github.com/zlhahaha/moonlocale/issues/1)、[#2](https://github.com/zlhahaha/moonlocale/issues/2)）
 - 在线报告与可复现命令，一条命令重跑全部结果
 
 ## 工程与合规
